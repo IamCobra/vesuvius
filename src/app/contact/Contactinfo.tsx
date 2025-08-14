@@ -1,7 +1,7 @@
 const contactDetails = [
   {
     title: "Adresse",
-    content: ["Culinary Gade 123", "Madkvarteret, By 12345"],
+    content: ["Vejnavn 12", "5000 Odense C"],
     icon: (
       <svg
         className="w-6 h-6"
@@ -26,7 +26,7 @@ const contactDetails = [
   },
   {
     title: "Telefon",
-    content: ["(555) 123-4567"],
+    content: ["+45 65 12 34 56"],
     icon: (
       <svg
         className="w-6 h-6"
@@ -45,7 +45,7 @@ const contactDetails = [
   },
   {
     title: "E-mail",
-    content: ["hello@vesuvius.com", "reservation@vesuvius.com"],
+    content: ["hej@vesuvius.dk", "reservation@vesuvius.dk"],
     icon: (
       <svg
         className="w-6 h-6"
@@ -98,7 +98,7 @@ export default function ContactInfo() {
       <div className="space-y-6">
         {contactDetails.map((detail, index) => (
           <div key={index} className="flex items-start space-x-4">
-            <div className="bg-[#F0E7D8] p-3 rounded-full text-[#A63A50] flex-shrink-0">
+            <div className="bg-burgundy-light p-3 rounded-full text-burgundy-primary flex-shrink-0">
               {detail.icon}
             </div>
             <div>
@@ -127,7 +127,7 @@ export default function ContactInfo() {
             <a
               key={social.name}
               href={social.href}
-              className="bg-[#F0E7D8] hover:bg-[#A63A50] text-[#A63A50] p-3 rounded-full transition-colors"
+              className="bg-burgundy-light hover:bg-burgundy-primary text-burgundy-primary p-3 rounded-full transition-colors"
               aria-label={`Følg os på ${social.name}`}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -139,7 +139,7 @@ export default function ContactInfo() {
       </div>
 
       {/* Akut kontakt */}
-      <div className="bg-[#F0E7D8] p-6 rounded-lg">
+  <div className="bg-burgundy-light p-6 rounded-lg">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
           Brug for akut hjælp?
         </h3>
@@ -148,8 +148,8 @@ export default function ContactInfo() {
           os.
         </p>
         <a
-          href="tel:+15551234567"
-          className="inline-flex items-center space-x-2 text-[#A63A50] font-semibold hover:text-[#8B2E44] transition-colors"
+          href="tel:+4565123456"
+          className="inline-flex items-center space-x-2 text-burgundy-primary font-semibold hover:text-burgundy-dark transition-colors"
         >
           <svg
             className="w-5 h-5"
@@ -164,7 +164,7 @@ export default function ContactInfo() {
               d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
             />
           </svg>
-          <span>(555) 123-4567</span>
+          <span>+45 65 12 34 56</span>
         </a>
       </div>
     </div>

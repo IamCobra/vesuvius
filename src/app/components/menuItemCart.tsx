@@ -28,23 +28,23 @@ export default function MenuItemCard({
         </h3>
         <p className="text-gray-600 mb-4">{item.description}</p>
         <div className="flex justify-between items-center">
-          <span className="text-2xl font-bold text-orange-600">
+          <span className="text-2xl font-bold text-burgundy-primary">
             ${item.price}
           </span>
           {showAddToCart &&
             (onAddToCart ? (
               <button
                 onClick={() => onAddToCart(item)}
-                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                className="bg-burgundy-primary text-white px-4 py-2 rounded-lg hover:bg-burgundy-dark transition-colors"
               >
-                Add to Cart
+                Tilføj
               </button>
             ) : (
               <Link
                 href="/order"
-                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                className="bg-burgundy-primary text-white px-4 py-2 rounded-lg hover:bg-burgundy-dark transition-colors"
               >
-                Add to Order
+                Tilføj
               </Link>
             ))}
         </div>

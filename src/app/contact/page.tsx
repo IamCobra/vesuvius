@@ -5,16 +5,6 @@ import Footer from "@/app/components/footer";
 export default function Contact() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <section className="bg-[#A63A50] text-white py-16 px-4 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Kontakt Os</h1>
-          <p className="text-xl text-[#F0E7D8]">
-            Vi er her for at hjælpe og besvare alle spørgsmål du måtte have
-          </p>
-        </div>
-      </section>
-
       {/* Contact Content */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
@@ -66,7 +56,7 @@ export default function Contact() {
                 />
               </svg>
               <p className="text-lg font-medium">Interaktivt Kort</p>
-              <p className="text-sm">123 Culinary Street, Food District</p>
+              <p className="text-sm">Vejnavn 12, 5000 Odense C</p>
               <p className="text-sm text-gray-500 mt-2">
                 Kort integration kommer snart
               </p>
@@ -76,7 +66,7 @@ export default function Contact() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-[#F0E7D8] to-[#A63A50]">
+  <section className="py-16 px-4 bg-gradient-to-br from-burgundy-light to-burgundy-primary">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
             Ofte Stillede Spørgsmål

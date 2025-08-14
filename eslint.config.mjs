@@ -1,13 +1,13 @@
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
+import js from "@eslint/js";
+import { FlatCompat } from "@eslint/eslintrc";
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
   recommendedConfig: js.configs.recommended,
-})
+});
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-]
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+];
 
-export default eslintConfig
+export default eslintConfig;

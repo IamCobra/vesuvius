@@ -31,16 +31,16 @@ const socialIcons = [
 ];
 
 const openingHours = [
-  { day: "Monday", hours: "CLOSED" },
-  { day: "Tuesday", hours: "12-1:30pm, 6-9pm" },
-  { day: "Wednesday", hours: "12-1:30pm, 6-9pm" },
-  { day: "Thursday", hours: "12-1:30pm, 6-9pm" },
-  { day: "Friday", hours: "12-1:30pm, 6-9pm" },
-  { day: "Saturday", hours: "12-1:30pm, 6-9pm" },
-  { day: "Sunday", hours: "12:15-1:30pm, 6:15-8:15pm" },
+  { day: "Mandag", hours: "LUKKET" },
+  { day: "Tirsdag", hours: "12:00–13:30, 18:00–21:00" },
+  { day: "Onsdag", hours: "12:00–13:30, 18:00–21:00" },
+  { day: "Torsdag", hours: "12:00–13:30, 18:00–21:00" },
+  { day: "Fredag", hours: "12:00–13:30, 18:00–21:30" },
+  { day: "Lørdag", hours: "12:00–13:30, 18:00–21:30" },
+  { day: "Søndag", hours: "12:15–13:30, 18:15–20:15" },
 ];
 
-<p>hello@vesuvius.com</p>;
+// removed stray email placeholder
 
 const quickLinks = [
   { name: "About Us", href: "/about" },
@@ -51,13 +51,13 @@ const quickLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#A63A50] text-white py-16 px-4">
+  <footer className="bg-burgundy-primary text-white py-16 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-3 gap-12">
           {/* Contact Us Section */}
           <div>
             <h3 className="text-2xl font-bold mb-8 italic">Contact Us</h3>
-            <div className="space-y-4 text-[#F0E7D8]">
+            <div className="space-y-4 text-burgundy-light">
               <div className="flex items-start space-x-3">
                 <svg
                   className="w-5 h-5 mt-1"
@@ -71,8 +71,8 @@ export default function Footer() {
                   />
                 </svg>
                 <div>
-                  <p>123 Culinary Street</p>
-                  <p>Food District, City 12345</p>
+                  <p>Vejnavn 12</p>
+                  <p>5000 Odense C</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -83,7 +83,7 @@ export default function Footer() {
                 >
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                <p>(555) 123-4567</p>
+                <p>+45 65 12 34 56</p>
               </div>
               <div className="flex items-center space-x-3">
                 <svg
@@ -94,7 +94,7 @@ export default function Footer() {
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
-                <p>hello@vesuvius.com</p>
+                <p>hej@vesuvius.dk</p>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function Footer() {
               <br />
               Opening Times
             </h3>
-            <div className="space-y-3 text-[#F0E7D8]">
+            <div className="space-y-3 text-burgundy-light">
               {openingHours.map(({ day, hours }) => (
                 <div key={day} className="flex justify-between">
                   <span>{day}</span>
@@ -124,7 +124,7 @@ export default function Footer() {
                 <Link
                   key={name}
                   href={href}
-                  className="block text-[#F0E7D8] hover:text-white transition-colors underline"
+                  className="block text-burgundy-light hover:text-white transition-colors underline"
                 >
                   {name}
                 </Link>

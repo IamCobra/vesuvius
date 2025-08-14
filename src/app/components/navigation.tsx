@@ -11,8 +11,8 @@ export default function Navigation() {
   const getLinkClass = (href: string) => {
     const isActive = pathname === href;
     return isActive
-      ? "text-[#A63A50] font-semibold"
-      : "text-gray-700 hover:text-[#A63A50] transition-colors duration-300";
+      ? "text-burgundy-primary font-semibold"
+      : "text-gray-700 hover:text-burgundy-primary transition-colors duration-300";
   };
 
   const navigationItems = [
@@ -29,7 +29,7 @@ export default function Navigation() {
           <div className="flex items-center">
             <Link
               href="/"
-              className="text-2xl font-bold text-gray-800 hover:text-[#A63A50] transition-colors duration-300"
+              className="text-2xl font-bold text-gray-800 hover:text-burgundy-primary transition-colors duration-300"
             >
               Vesuvius
             </Link>
