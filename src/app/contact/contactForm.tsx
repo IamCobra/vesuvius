@@ -60,7 +60,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
             id="name"
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A63A50] focus:border-transparent transition-colors"
             required
           />
         </div>
@@ -76,7 +76,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
             id="email"
             value={formData.email}
             onChange={(e) => handleInputChange("email", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A63A50] focus:border-transparent transition-colors"
             required
           />
         </div>
@@ -95,7 +95,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
             id="phone"
             value={formData.phone}
             onChange={(e) => handleInputChange("phone", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A63A50] focus:border-transparent transition-colors"
           />
         </div>
         <div>
@@ -109,7 +109,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
             id="subject"
             value={formData.subject}
             onChange={(e) => handleInputChange("subject", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A63A50] focus:border-transparent transition-colors"
             required
           >
             <option value="">Vælg et emne</option>
@@ -135,7 +135,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
           rows={6}
           value={formData.message}
           onChange={(e) => handleInputChange("message", e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors resize-none"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A63A50] focus:border-transparent transition-colors resize-none"
           placeholder="Fortæl os, hvordan vi kan hjælpe dig..."
           required
         />
@@ -144,7 +144,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[#A63A50] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#8B2E44] focus:ring-2 focus:ring-[#A63A50] focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? "Sender..." : "Send besked"}
       </button>

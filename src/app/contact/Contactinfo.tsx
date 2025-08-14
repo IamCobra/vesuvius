@@ -89,14 +89,16 @@ export default function ContactInfo() {
       <div>
         <h2 className="text-3xl font-bold text-gray-800 mb-4">Kontakt os</h2>
         <p className="text-lg text-gray-600 leading-relaxed">
-          Vi vil meget gerne høre fra dig! Uanset om du har spørgsmål til vores menu, ønsker at reservere bord eller har brug for catering til dit arrangement, står vores team klar til at hjælpe.
+          Vi vil meget gerne høre fra dig! Uanset om du har spørgsmål til vores
+          menu, ønsker at reservere bord eller har brug for catering til dit
+          arrangement, står vores team klar til at hjælpe.
         </p>
       </div>
 
       <div className="space-y-6">
         {contactDetails.map((detail, index) => (
           <div key={index} className="flex items-start space-x-4">
-            <div className="bg-orange-100 p-3 rounded-full text-orange-600 flex-shrink-0">
+            <div className="bg-[#F0E7D8] p-3 rounded-full text-[#A63A50] flex-shrink-0">
               {detail.icon}
             </div>
             <div>
@@ -125,7 +127,7 @@ export default function ContactInfo() {
             <a
               key={social.name}
               href={social.href}
-              className="bg-orange-100 hover:bg-orange-200 text-orange-600 p-3 rounded-full transition-colors"
+              className="bg-[#F0E7D8] hover:bg-[#A63A50] text-[#A63A50] p-3 rounded-full transition-colors"
               aria-label={`Følg os på ${social.name}`}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -137,16 +139,17 @@ export default function ContactInfo() {
       </div>
 
       {/* Akut kontakt */}
-      <div className="bg-orange-50 p-6 rounded-lg">
+      <div className="bg-[#F0E7D8] p-6 rounded-lg">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
           Brug for akut hjælp?
         </h3>
         <p className="text-gray-600 mb-3">
-          Ved hastesager eller reservation samme dag, ring venligst direkte til os.
+          Ved hastesager eller reservation samme dag, ring venligst direkte til
+          os.
         </p>
         <a
           href="tel:+15551234567"
-          className="inline-flex items-center space-x-2 text-orange-600 font-semibold hover:text-orange-700 transition-colors"
+          className="inline-flex items-center space-x-2 text-[#A63A50] font-semibold hover:text-[#8B2E44] transition-colors"
         >
           <svg
             className="w-5 h-5"

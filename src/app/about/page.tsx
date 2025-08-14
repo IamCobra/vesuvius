@@ -1,15 +1,19 @@
-"use client";
+export const metadata = {
+  title: "Om Vesuvius",
+  description: "Om Vesuvius restaurant og vores historie.",
+};
 
 import Image from "next/image";
+import BackButton from "@/app/about/BackButton";
 
 export default function AboutPage() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
-      <h1 className="text-4xl font-bold mb-6 text-center text-orange-700">
+      <h1 className="text-4xl font-bold mb-6 text-center text-[#A63A50]">
         Om Vesuvius
       </h1>
       <div className="flex justify-center mb-6">
-        <div className="rounded-full overflow-hidden shadow-lg border-4 border-orange-200 w-40 h-40 bg-white flex items-center justify-center">
+        <div className="rounded-full overflow-hidden shadow-lg border-4 border-[#F0E7D8] w-40 h-40 bg-white flex items-center justify-center">
           <Image
             src="/aboutimage.avif"
             alt="Restaurant Vesuvius interiør"
@@ -22,15 +26,15 @@ export default function AboutPage() {
       </div>
       <p className="text-lg mb-6 text-center">
         Velkommen til{" "}
-        <span className="text-orange-600 font-semibold">Vesuvius</span>, hvor vi
+        <span className="text-[#A63A50] font-semibold">Vesuvius</span>, hvor vi
         serverer byens bedste pizza!
         <br />
         Vores passion for autentisk italiensk mad og friske råvarer gør os
         unikke. Uanset om du spiser hos os eller bestiller ud, lover vi en
         lækker oplevelse hver gang.
       </p>
-      <div className="bg-orange-200 rounded-lg p-6 shadow text-center">
-        <h2 className="text-2xl font-semibold mb-2 text-orange-700">
+      <div className="bg-[#F0E7D8] rounded-lg p-6 shadow text-center">
+        <h2 className="text-2xl font-semibold mb-2 text-[#A63A50]">
           Vores historie
         </h2>
         <p>
@@ -40,12 +44,7 @@ export default function AboutPage() {
         </p>
       </div>
 
-      <button
-        className="mt-6 px-4 py-2 bg-orange-600 rounded hover:bg-orange-700"
-        onClick={() => window.history.back()}
-      >
-        Tilbage
-      </button>
+      <BackButton className="mt-6 px-4 py-2 bg-[#A63A50] rounded hover:bg-[#8B2E44]" />
     </div>
   );
 }

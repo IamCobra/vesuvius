@@ -76,7 +76,7 @@ export default function Contact() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-orange-50 to-red-50">
+      <section className="py-16 px-4 bg-gradient-to-br from-[#F0E7D8] to-[#A63A50]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
             Ofte Stillede Spørgsmål

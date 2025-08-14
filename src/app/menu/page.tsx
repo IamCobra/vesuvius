@@ -83,7 +83,7 @@ export default function Menu() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-orange-600 text-white py-16 px-4 text-center">
+      <section className="bg-[#A63A50] text-white py-16 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Menu</h1>
           <p className="text-xl">
@@ -103,8 +103,8 @@ export default function Menu() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-6 py-2 rounded-full font-semibold transition-colors ${
                   selectedCategory === category
-                    ? "bg-orange-600 text-white"
-                    : "bg-white text-gray-700 border border-gray-300 hover:bg-orange-50"
+                    ? "bg-[#A63A50] text-white"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-[#F0E7D8]"
                 }`}
               >
                 {category}
@@ -126,12 +126,12 @@ export default function Menu() {
                   </h3>
                   <p className="text-gray-600 mb-4">{item.description}</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-orange-600">
+                    <span className="text-2xl font-bold text-[#A63A50]">
                       ${item.price}
                     </span>
                     <Link
                       href="/order"
-                      className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                      className="bg-[#A63A50] text-white px-4 py-2 rounded-lg hover:bg-[#8B2E44] transition-colors"
                     >
                       Add to Order
                     </Link>
