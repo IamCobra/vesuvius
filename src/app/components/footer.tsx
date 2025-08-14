@@ -40,14 +40,13 @@ const openingHours = [
   { day: "Sunday", hours: "12:15-1:30pm, 6:15-8:15pm" },
 ];
 
-
-                <p>hello@vesuvius.com</p>
+<p>hello@vesuvius.com</p>;
 
 const quickLinks = [
-  { name: "About Us", href: "/" },
+  { name: "About Us", href: "/about" },
   { name: "Make a Booking", href: "/order" },
   { name: "Menu", href: "/menu" },
-  { name: "Contact Us", href: "/order" },
+  { name: "Contact Us", href: "/contact" },
 ];
 
 export default function Footer() {
