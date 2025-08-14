@@ -66,7 +66,7 @@ export default function Contact() {
       </section>
 
       {/* FAQ Section */}
-  <section className="py-16 px-4 bg-gradient-to-br from-burgundy-light to-burgundy-primary">
+      <section className="py-16 px-4 bg-gradient-to-br from-burgundy-light to-burgundy-primary">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
             Ofte Stillede Spørgsmål

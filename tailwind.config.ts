@@ -11,9 +11,9 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-  'burgundy-primary': '#B94A5F',
-  'burgundy-dark': '#962E44',
-  'burgundy-light': '#F6EDE6',
+        "burgundy-primary": "#B94A5F",
+        "burgundy-dark": "#962E44",
+        "burgundy-light": "#F6EDE6",
       },
     },
   },

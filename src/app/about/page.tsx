@@ -9,11 +9,11 @@ import BackButton from "@/app/about/BackButton";
 export default function AboutPage() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
-  <h1 className="text-4xl font-bold mb-6 text-center text-burgundy-primary">
+      <h1 className="text-4xl font-bold mb-6 text-center text-burgundy-primary">
         Om Vesuvius
       </h1>
       <div className="flex justify-center mb-6">
-  <div className="rounded-full overflow-hidden shadow-lg border-4 border-burgundy-light w-40 h-40 bg-white flex items-center justify-center">
+        <div className="rounded-full overflow-hidden shadow-lg border-4 border-burgundy-light w-40 h-40 bg-white flex items-center justify-center">
           <Image
             src="/aboutimage.avif"
             alt="Restaurant Vesuvius interiør"
@@ -26,8 +26,8 @@ export default function AboutPage() {
       </div>
       <p className="text-lg mb-6 text-center">
         Velkommen til{" "}
-  <span className="text-burgundy-primary font-semibold">Vesuvius</span>, hvor vi
-        serverer byens bedste pizza!
+        <span className="text-burgundy-primary font-semibold">Vesuvius</span>,
+        hvor vi serverer byens bedste pizza!
         <br />
         Vores passion for autentisk italiensk mad og friske råvarer gør os
         unikke. Uanset om du spiser hos os eller bestiller ud, lover vi en
@@ -44,7 +44,7 @@ export default function AboutPage() {
         </p>
       </div>
 
-  <BackButton className="mt-6 px-4 py-2 bg-burgundy-primary rounded hover:bg-burgundy-dark" />
+      <BackButton className="mt-6 px-4 py-2 bg-burgundy-primary rounded hover:bg-burgundy-dark" />
     </div>
   );
 }

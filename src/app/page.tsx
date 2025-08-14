@@ -3,27 +3,28 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-  <div className="min-h-screen">
+    <div className="min-h-screen">
       {/* Hero Section with Your Food Background */}
-  {/* make hero slightly shorter than full viewport so the sticky header doesn't push the bottom off-screen */}
-  <section className="relative min-h-[calc(100vh-64px)] flex items-center justify-center bg-burgundy-primary">
+      {/* make hero slightly shorter than full viewport so the sticky header doesn't push the bottom off-screen */}
+      <section className="relative min-h-[calc(100vh-64px)] flex items-center justify-center bg-burgundy-primary">
         {/* Background Image */}
         <Image
           src="/heroimg.jpg"
           alt="Vesuvius Restaurant Background"
           fill
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: "cover" }}
           priority
           className="absolute inset-0"
         />
-        
+
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
 
         {/* Content Overlay */}
         <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-lg">
-            Velkommen til <span className="text-burgundy-primary">Vesuvius</span>
+            Velkommen til{" "}
+            <span className="text-burgundy-primary">Vesuvius</span>
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
             Oplev de fineste smagsoplevelser med vores omhyggeligt tilberedte
@@ -46,7 +47,7 @@ export default function Home() {
         </div>
 
         {/* Scroll Indicator */}
-  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce z-30">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce z-30">
           <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white rounded-full mt-2 animate-pulse"></div>
           </div>
@@ -54,7 +55,7 @@ export default function Home() {
       </section>
 
       {/* About Section - Pure Tailwind */}
-  <section className="py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-burgundy-light">
+      <section className="py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-burgundy-light">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>

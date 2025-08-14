@@ -139,7 +139,7 @@ export default function ContactInfo() {
       </div>
 
       {/* Akut kontakt */}
-  <div className="bg-burgundy-light p-6 rounded-lg">
+      <div className="bg-burgundy-light p-6 rounded-lg">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">
           Brug for akut hjælp?
         </h3>

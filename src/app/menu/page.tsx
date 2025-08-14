@@ -108,11 +108,17 @@ export default function Menu() {
               <div key={item.id} className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800">{item.name}</h3>
-                    <p className="text-sm text-gray-500 mt-2">{item.description}</p>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      {item.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-2">
+                      {item.description}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl font-bold text-burgundy-primary">${item.price}</span>
+                    <span className="text-2xl font-bold text-burgundy-primary">
+                      ${item.price}
+                    </span>
                     <Link
                       href="/order"
                       className="block mt-4 bg-burgundy-primary text-white px-4 py-2 rounded-lg hover:bg-burgundy-dark transition-colors"
@@ -129,7 +135,6 @@ export default function Menu() {
 
       {/* Shared Footer component */}
       <Footer />
-
     </div>
   );
 }
