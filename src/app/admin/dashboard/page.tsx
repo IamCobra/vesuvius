@@ -165,7 +165,7 @@ export default function AdminDashboard() {
       console.error(err);
     }
   };
-
+/*
   // Session fetch effect
   useEffect(() => {
     let mounted = true;
@@ -177,6 +177,12 @@ export default function AdminDashboard() {
     return () => {
       mounted = false;
     };
+  }, []);
+*/
+
+useEffect(() => {
+  setSession({ role: "admin", name: "Dev Tester" });
+  setLoadingSession(false);
   }, []);
 
   // Data fetching effect - now includes dependencies
@@ -222,31 +228,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">Vesuvius — Admin</h1>
-          <span className="text-sm text-gray-500">
-            Velkommen, {session.name}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-              fetchStats();
-              fetchMenu();
-            }}
-            className="px-3 py-1 border rounded text-sm"
-          >
-            Opdater
-          </button>
-          <Link
-            href="/logout"
-            className="px-3 py-1 bg-red-600 text-white rounded text-sm"
-          >
-            Log ud
-          </Link>
-        </div>
-      </header>
 
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
