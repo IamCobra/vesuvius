@@ -40,8 +40,6 @@ const openingHours = [
   { day: "Søndag", hours: "12:15–13:30, 18:15–20:15" },
 ];
 
-// removed stray email placeholder
-
 const quickLinks = [
   { name: "About Us", href: "/about" },
   { name: "Make a Booking", href: "/order" },
