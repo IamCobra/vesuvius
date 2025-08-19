@@ -1,139 +1,129 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 import Footer from "@/app/components/footer";
+import { prisma } from "@/app/lib/prisma";
 
-interface MenuItem {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
+// Server Component - fetcher data direkte
+async function getMenuData() {
+  const categories = await prisma.category.findMany({
+    include: {
+      menuItems: {
+        include: {
+          variants: true,
+        },
+        where: {
+          available: true,
+        },
+      },
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  return categories;
 }
 
-const menuItems: MenuItem[] = [
-  {
-    id: 1,
-    name: "Classic Burger",
-    description: "Juicy beef patty with lettuce, tomato, and our special sauce",
-    price: 12.99,
-    category: "Burgers",
-    image: "🍔",
-  },
-  {
-    id: 2,
-    name: "Margherita Pizza",
-    description: "Fresh mozzarella, tomato sauce, and basil on thin crust",
-    price: 14.99,
-    category: "Pizza",
-    image: "🍕",
-  },
-  {
-    id: 3,
-    name: "Caesar Salad",
-    description: "Crispy romaine lettuce with parmesan and croutons",
-    price: 9.99,
-    category: "Salads",
-    image: "🥗",
-  },
-  {
-    id: 4,
-    name: "Chicken Wings",
-    description: "Spicy buffalo wings served with ranch dipping sauce",
-    price: 11.99,
-    category: "Appetizers",
-    image: "🍗",
-  },
-  {
-    id: 5,
-    name: "Pasta Carbonara",
-    description: "Creamy pasta with bacon, eggs, and parmesan cheese",
-    price: 13.99,
-    category: "Pasta",
-    image: "🍝",
-  },
-  {
-    id: 6,
-    name: "Fish Tacos",
-    description: "Grilled fish with cabbage slaw and lime crema",
-    price: 10.99,
-    category: "Tacos",
-    image: "🌮",
-  },
-];
+export default async function Menu() {
+  const categories = await getMenuData();
 
-export default function Menu() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const categories = [
-    "All",
-    "Burgers",
-    "Pizza",
-    "Salads",
-    "Appetizers",
-    "Pasta",
-    "Tacos",
-  ];
-
-  const filteredItems =
-    selectedCategory === "All"
-      ? menuItems
-      : menuItems.filter((item) => item.category === selectedCategory);
+  // Opret "All" kategori med alle menu items
+  const allMenuItems = categories.flatMap((cat) => cat.menuItems);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-3 mb-8">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                  selectedCategory === cat
-                    ? "bg-burgundy-primary text-white"
-                    : "bg-white text-gray-700 border border-gray-300 hover:bg-burgundy-light"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-burgundy-primary mb-4">
+              Vores Menu
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Oplev autentiske italienske smagsoplevelser tilberedt med de
+              fineste ingredienser
+            </p>
           </div>
 
-          {/* Items Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      {item.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-2">
-                      {item.description}
-                    </p>
+          {/* Category Sections */}
+          {categories.map((category) => (
+            <section key={category.id} className="mb-16">
+              <h2 className="text-3xl font-bold text-burgundy-primary mb-8 text-center">
+                {category.name}
+              </h2>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.menuItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                          {item.name}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                          {item.description}
+                        </p>
+
+                        {/* Variants hvis de findes */}
+                        {item.variants.length > 0 && (
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-500 mb-2">
+                              Varianter:
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                              {item.variants.map((variant) => (
+                                <span
+                                  key={variant.id}
+                                  className="px-2 py-1 text-xs bg-burgundy-light text-burgundy-primary rounded"
+                                >
+                                  {variant.name}{" "}
+                                  {variant.priceChange > 0 &&
+                                    `(+${variant.priceChange} kr)`}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-right ml-4">
+                        <span className="text-2xl font-bold text-burgundy-primary">
+                          {item.price} kr
+                        </span>
+                        <Link
+                          href="/order"
+                          className="block mt-4 bg-burgundy-primary text-white px-4 py-2 rounded-lg hover:bg-burgundy-dark transition-colors text-center text-sm font-medium"
+                        >
+                          Tilføj
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-2xl font-bold text-burgundy-primary">
-                      ${item.price}
-                    </span>
-                    <Link
-                      href="/order"
-                      className="block mt-4 bg-burgundy-primary text-white px-4 py-2 rounded-lg hover:bg-burgundy-dark transition-colors"
-                    >
-                      Tilføj
-                    </Link>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </section>
+          ))}
+
+          {/* CTA Section */}
+          <div className="text-center mt-16 p-8 bg-burgundy-primary rounded-lg">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Klar til at bestille?
+            </h3>
+            <p className="text-burgundy-light mb-6">
+              Vælg dine yndlingsretter og afgiv din bestilling
+            </p>
+            <Link
+              href="/order"
+              className="inline-block bg-white text-burgundy-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Bestil Nu
+            </Link>
           </div>
         </div>
       </main>
 
-      {/* Shared Footer component */}
       <Footer />
     </div>
   );

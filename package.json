@@ -9,11 +9,13 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "dependencies": {
     "@eslint/js": "^9.33.0",
     "@prisma/client": "^6.14.0",
     "bcryptjs": "^3.0.2",
-    "mysql2": "^3.14.3",
     "next": "15.4.6",
     "next-auth": "^5.0.0-beta.29",
     "react": "19.1.0",
@@ -22,7 +24,7 @@
     "tailwindcss": "^3.4.14"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.33.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -32,6 +34,7 @@
     "eslint-config-next": "15.4.6",
     "postcss": "^8.5.6",
     "prisma": "^6.14.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

@@ -1,15 +1,96 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  menuItems MenuItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  price       Float
+  image       String?
+  available   Boolean  @default(true)
+  
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  
+  variants    MenuItemVariant[]
+  orderItems  OrderItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("menu_items")
+}
+
+model MenuItemVariant {
+  id          String   @id @default(cuid())
+  name        String   // "Dobbelt", "Vegetarbøf", etc.
+  priceChange Float    // +26 for dobbelt, +0 for vegetar
+  
+  menuItemId  String
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("menu_item_variants")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  tableNumber Int?
+  status      OrderStatus @default(PENDING)
+  totalPrice  Float
+  notes       String?     // Special requests
+  
+  items       OrderItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String @id @default(cuid())
+  quantity   Int
+  unitPrice  Float
+  
+  orderId    String
+  order      Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  
+  // JSON for variants og tilvalg som "Dobbelt burger", "Ekstra ost"
+  customizations Json?
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING    // Ny bestilling
+  CONFIRMED  // Bekræftet af tjener
+  PREPARING  // I gang i køkkenet
+  READY      // Klar til servering
+  SERVED     // Serveret til gæst
+  CANCELLED  // Annulleret
 }
