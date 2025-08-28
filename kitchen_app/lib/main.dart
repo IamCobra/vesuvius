@@ -57,10 +57,9 @@ extension OrderStatusProps on OrderStatus {
   }
 
   Color get color {
-    // Farver til knapper/headers
     switch (this) {
       case OrderStatus.queued:
-        return Colors.orange.shade700; // bedre læsbar end lys gul
+        return Colors.orange.shade700; 
       case OrderStatus.inProgress:
         return Colors.blue.shade700;
       case OrderStatus.ready:
@@ -188,7 +187,6 @@ class _KitchenScreenState extends State<KitchenScreen> {
   }
 
   Future<void> _updateStatus(int orderId, OrderStatus newStatus) async {
-    // Vis midlertidig loading-snackbar / progress
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     final snack = SnackBar(
       content: Row(
@@ -204,7 +202,6 @@ class _KitchenScreenState extends State<KitchenScreen> {
 
     try {
       final updated = await mockUpdateStatus(orderId, newStatus);
-      // Opfrisk lokale visning
       await _loadOrders();
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -253,7 +250,6 @@ class _KitchenScreenState extends State<KitchenScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Loading & fejl indikator
             if (loading)
               LinearProgressIndicator(
                 minHeight: 4,
@@ -289,7 +285,6 @@ class _KitchenScreenState extends State<KitchenScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header: status label + count
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
@@ -361,7 +356,6 @@ class _KitchenScreenState extends State<KitchenScreen> {
   }
 }
 
-// ---------------- OrderCard widget ----------------
 class _OrderCard extends StatelessWidget {
   final Order order;
   final List<OrderStatus> statuses;
@@ -379,7 +373,6 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Størrelse og layout-optimeringer for touch
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -389,7 +382,6 @@ class _OrderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top row: id + table + urgency badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -399,7 +391,6 @@ class _OrderCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Text(order.table, style: const TextStyle(fontWeight: FontWeight.w600)),
                 ]),
-                // Urgency badge (tidsindikator)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   decoration: BoxDecoration(
@@ -429,7 +420,6 @@ class _OrderCard extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // Buttons: store, rundede, finger-venlige
             Wrap(
               spacing: 10,
               runSpacing: 8,
@@ -450,7 +440,6 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-// ---------------- stor status-knap (ikon + label) ----------------
 class _StatusButton extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -466,7 +455,6 @@ class _StatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fixed minimum touch-target størrelse, rundede kanter, fed hvid tekst
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, color: Colors.white, size: 20),
@@ -480,7 +468,7 @@ class _StatusButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        minimumSize: const Size(140, 52), // sikrer stort touch-target
+        minimumSize: const Size(140, 52), 
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 2,
       ),
