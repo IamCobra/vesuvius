@@ -13,11 +13,54 @@ class KitchenApp extends StatelessWidget {
     return MaterialApp(
       title: 'Køkken Skærm',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFF3A0D12), // dyb burgundy
+        scaffoldBackgroundColor: const Color(0xFF121212), // næsten sort
         textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 16),
-          bodySmall: TextStyle(fontSize: 14),
-          titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          bodyMedium: TextStyle(fontSize: 16, color: Color(0xFFE0E0E0)),
+          bodySmall: TextStyle(fontSize: 14, color: Color(0xFF999999)),
+          titleLarge: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFFF5E6E6), // lys burgundy-tekst
+          ),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF3A0D12), // dyb burgundy
+          foregroundColor: Colors.white,
+          elevation: 3,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: const Color(0xFF1E1E1E),
+          shadowColor: Colors.black87,
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        snackBarTheme: const SnackBarThemeData(
+          backgroundColor: Color(0xFF1E1E1E),
+          contentTextStyle: TextStyle(color: Colors.white),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: MaterialStatePropertyAll(Color(0xFF3A0D12)), // burgundy
+            foregroundColor: MaterialStatePropertyAll(Colors.white),
+            shape: MaterialStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(14)),
+              ),
+            ),
+            padding: MaterialStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            ),
+            elevation: MaterialStatePropertyAll(2),
+          ),
         ),
       ),
       home: const KitchenScreen(),
@@ -59,13 +102,13 @@ extension OrderStatusProps on OrderStatus {
   Color get color {
     switch (this) {
       case OrderStatus.queued:
-        return Colors.orange.shade700; 
+        return const Color(0xFF8C6A00); // mørk guld
       case OrderStatus.inProgress:
-        return Colors.blue.shade700;
+        return const Color(0xFF0A1A40); // meget mørkeblå
       case OrderStatus.ready:
-        return Colors.green.shade700;
+        return const Color(0xFF1B4020); // mørk grøn
       case OrderStatus.complications:
-        return Colors.red.shade700;
+        return const Color(0xFF5A0A0A); // dyb mørkerød
     }
   }
 }
@@ -92,7 +135,7 @@ class Order {
   });
 }
 
-// ---------------- MOCK DATA / SIMULERET API ----------------
+// ---------------- MOCK DATA ----------------
 List<Order> _mockOrders = [
   Order(
     id: 101,
@@ -120,20 +163,19 @@ List<Order> _mockOrders = [
   ),
 ];
 
-// Simuleret fetch
 Future<List<Order>> mockFetchOrders() async {
   await Future.delayed(const Duration(milliseconds: 200));
-  // Returner kopi så UI kan sortere uden at ændre den originale liste direkte
-  return _mockOrders.map((o) => Order(
-    id: o.id,
-    table: o.table,
-    status: o.status,
-    items: List.from(o.items),
-    placedAt: o.placedAt,
-  )).toList();
+  return _mockOrders
+      .map((o) => Order(
+            id: o.id,
+            table: o.table,
+            status: o.status,
+            items: List.from(o.items),
+            placedAt: o.placedAt,
+          ))
+      .toList();
 }
 
-// Simuleret opdatering
 Future<Order> mockUpdateStatus(int orderId, OrderStatus newStatus) async {
   await Future.delayed(const Duration(milliseconds: 200));
   final idx = _mockOrders.indexWhere((o) => o.id == orderId);
@@ -205,7 +247,8 @@ class _KitchenScreenState extends State<KitchenScreen> {
       await _loadOrders();
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Ordre #${updated.id} flyttet til "${updated.status.label}" ✅'),
+        content:
+            Text('Ordre #${updated.id} flyttet til "${updated.status.label}" ✅'),
         backgroundColor: Colors.grey[900],
       ));
     } catch (e) {
@@ -222,12 +265,11 @@ class _KitchenScreenState extends State<KitchenScreen> {
     return diff == 0 ? 'Nu' : '$diff min';
   }
 
-  // Prioritetsfarve baseret på hvor gammel ordren er
   Color _urgencyColor(Order order) {
     final diff = DateTime.now().difference(order.placedAt).inMinutes;
-    if (diff < 5) return Colors.green.shade700;
-    if (diff < 15) return Colors.orange.shade800;
-    return Colors.red.shade700;
+    if (diff < 5) return const Color(0xFF1B4020); // mørkegrøn
+    if (diff < 15) return const Color(0xFF8C6A00); // mørk guld
+    return const Color(0xFF5A0A0A); // mørkerød
   }
 
   @override
@@ -254,42 +296,54 @@ class _KitchenScreenState extends State<KitchenScreen> {
               LinearProgressIndicator(
                 minHeight: 4,
                 color: Theme.of(context).primaryColor,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Colors.grey[900],
               ),
             if (error.isNotEmpty)
               Container(
                 width: double.infinity,
-                color: Colors.red.shade50,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                child: Text(error, style: const TextStyle(color: Colors.red)),
+                color: Colors.red.shade900,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                child: Text(error,
+                    style: const TextStyle(color: Colors.white, fontSize: 16)),
               ),
-
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _loadOrders,
+                color: Theme.of(context).primaryColor,
+                backgroundColor: Colors.black,
                 child: GridView.count(
                   crossAxisCount: crossAxisCount,
                   padding: const EdgeInsets.all(12),
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   children: statuses.map((status) {
-                    final filtered = orders.where((o) => o.status == status).toList();
+                    final filtered =
+                        orders.where((o) => o.status == status).toList();
 
                     return Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-                        border: Border.all(color: status.color.withOpacity(0.12)),
+                        color: const Color(0xFF1C1C1C),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black54,
+                              blurRadius: 6,
+                              offset: Offset(0, 3))
+                        ],
+                        border: Border.all(
+                            color: status.color.withOpacity(0.35), width: 1.2),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                             decoration: BoxDecoration(
                               color: status.color,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(14)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -306,25 +360,28 @@ class _KitchenScreenState extends State<KitchenScreen> {
                                   ],
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: Colors.white24,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text('${filtered.length}',
-                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700)),
                                 ),
                               ],
                             ),
                           ),
-
-                          // Indhold: liste over ordrer i denne status
                           Expanded(
                             child: filtered.isEmpty
                                 ? Center(
                                     child: Text(
                                       'Ingen ordrer',
-                                      style: TextStyle(color: Colors.grey[500], fontStyle: FontStyle.italic),
+                                      style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontStyle: FontStyle.italic),
                                     ),
                                   )
                                 : ListView.builder(
@@ -336,7 +393,8 @@ class _KitchenScreenState extends State<KitchenScreen> {
                                         order: order,
                                         statuses: statuses,
                                         onChangeStatus: _updateStatus,
-                                        timeSinceLabel: _timeSince(order.placedAt),
+                                        timeSinceLabel:
+                                            _timeSince(order.placedAt),
                                         urgencyColor: _urgencyColor(order),
                                       );
                                     },
@@ -359,7 +417,8 @@ class _KitchenScreenState extends State<KitchenScreen> {
 class _OrderCard extends StatelessWidget {
   final Order order;
   final List<OrderStatus> statuses;
-  final Future<void> Function(int orderId, OrderStatus newStatus) onChangeStatus;
+  final Future<void> Function(int orderId, OrderStatus newStatus)
+      onChangeStatus;
   final String timeSinceLabel;
   final Color urgencyColor;
 
@@ -375,8 +434,6 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 1,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -387,39 +444,45 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Row(children: [
                   Text('#${order.id}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Colors.white)),
                   const SizedBox(width: 12),
-                  Text(order.table, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(order.table,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: Colors.white70)),
                 ]),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   decoration: BoxDecoration(
                     color: urgencyColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     timeSinceLabel,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
-
-            // Items
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: order.items
                   .map((it) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Text('${it.qty}× ${it.name}', style: const TextStyle(fontSize: 15)),
+                        child: Text('${it.qty}× ${it.name}',
+                            style: const TextStyle(
+                                fontSize: 15, color: Colors.white70)),
                       ))
                   .toList(),
             ),
-
             const SizedBox(height: 10),
-
             Wrap(
               spacing: 10,
               runSpacing: 8,
@@ -462,14 +525,16 @@ class _StatusButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
         ),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        minimumSize: const Size(140, 52), 
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        minimumSize: const Size(140, 52),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 2,
       ),
     );
