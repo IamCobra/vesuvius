@@ -51,28 +51,108 @@ model MenuItemVariant {
   @@map("menu_item_variants")
 }
 
+// Enhanced Customer Management (from your SQL)
+model Customer {
+  id           String        @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String        @unique
+  phone        String?       // Converted from INT to String for better phone handling
+  reservations Reservation[]
+  orders       Order[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("customers")
+}
+
+// Time Slot Management (from your ReservationTimes)
+model TimeSlot {
+  id           String        @id @default(cuid())
+  startTime    String        // "17:00"
+  endTime      String        // "19:00"
+  maxTables    Int           @default(10) // Maximum available tables for this slot
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("time_slots")
+}
+
+// Dining Table Management
+model DiningTable {
+  id               String             @id @default(cuid())
+  tableNumber      Int                @unique
+  seats            Int                @default(4) // Number of seats per table
+  reservedTables   ReservedTable[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@map("dining_tables")
+}
+
+// Enhanced Reservations (combining your approach with current)
+model Reservation {
+  id            String             @id @default(cuid())
+  partySize     Int
+  reservationDate DateTime         // Date of reservation
+  customerId    String
+  customer      Customer           @relation(fields: [customerId], references: [id])
+  timeSlotId    String
+  timeSlot      TimeSlot           @relation(fields: [timeSlotId], references: [id])
+  status        ReservationStatus  @default(CONFIRMED)
+  
+  // Relations from your SQL
+  reservedTables ReservedTable[]
+  orders         Order[]
+  
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([reservationDate, timeSlotId])
+  @@map("reservations")
+}
+
+// Junction table for reservations and tables (many-to-many)
+model ReservedTable {
+  id            String      @id @default(cuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  tableId       String
+  table         DiningTable @relation(fields: [tableId], references: [id])
+  
+  @@unique([reservationId, tableId])
+  @@map("reserved_tables")
+}
+
+// Order Management (from your SQL)
 model Order {
-  id          String      @id @default(cuid())
-  tableNumber Int?
-  status      OrderStatus @default(PENDING)
-  totalPrice  Float
-  notes       String?     // Special requests
+  id            String      @id @default(cuid())
+  reservationId String?     // Optional - some orders might not be tied to reservations
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  customerId    String?     // Direct customer link for walk-ins
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  tableNumber   Int?        // For walk-in customers
+  status        OrderStatus @default(ORDERED)
+  totalPrice    Float       @default(0)
+  notes         String?     // Special requests
   
-  items       OrderItem[]
+  items         OrderItem[]
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@map("orders")
 }
 
+// Order Items (from your OrderedDishes)
 model OrderItem {
-  id         String @id @default(cuid())
+  id         String   @id @default(cuid())
   quantity   Int
   unitPrice  Float
   
   orderId    String
-  order      Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   
   menuItemId String
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
@@ -86,11 +166,55 @@ model OrderItem {
   @@map("order_items")
 }
 
-enum OrderStatus {
-  PENDING    // Ny bestilling
-  CONFIRMED  // Bekræftet af tjener
-  PREPARING  // I gang i køkkenet
-  READY      // Klar til servering
-  SERVED     // Serveret til gæst
-  CANCELLED  // Annulleret
+model OpeningHour {
+  id         String   @id @default(cuid())
+  // 0=Sunday … 6=Saturday
+  weekday    Int
+  openTime   String   // "16:00"
+  closeTime  String   // "22:00"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([weekday])
 }
+
+model Blackout {
+  id        String   @id @default(cuid())
+  startUtc  DateTime
+  endUtc    DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startUtc, endUtc])
+}
+
+model SlotSetting {
+  id               Int      @id @default(1)
+  slotMinutes      Int      @default(30)
+  maxCoversPerSlot Int      @default(24)
+  maxPartySize     Int      @default(8)
+  timezone         String   @default("Europe/Copenhagen")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// Enums
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum OrderStatus {
+  ORDERED
+  IN_PREPARATION
+  READY
+  SERVED
+  COMPLETED
+  CANCELLED
+}
+
+
+

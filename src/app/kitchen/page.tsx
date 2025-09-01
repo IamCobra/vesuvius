@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 type Order = {
   id: number;
@@ -12,7 +11,7 @@ type Order = {
 };
 
 // --- MOCK DATA I FRONTEND ---
-let mockOrders: Order[] = [
+const mockOrders: Order[] = [
   {
     id: 101,
     table: "Bord 4",
@@ -41,10 +40,15 @@ let mockOrders: Order[] = [
 
 // Simuler API-kald
 async function mockFetchOrders(): Promise<Order[]> {
-  return new Promise((resolve) => setTimeout(() => resolve([...mockOrders]), 200));
+  return new Promise((resolve) =>
+    setTimeout(() => resolve([...mockOrders]), 200)
+  );
 }
 
-async function mockUpdateStatus(orderId: number, newStatus: Order["status"]): Promise<Order> {
+async function mockUpdateStatus(
+  orderId: number,
+  newStatus: Order["status"]
+): Promise<Order> {
   return new Promise((resolve, reject) => {
     const order = mockOrders.find((o) => o.id === orderId);
     if (!order) return reject(new Error("Order not found"));
@@ -56,15 +60,21 @@ async function mockUpdateStatus(orderId: number, newStatus: Order["status"]): Pr
 // --- KØKKENSKÆRM ---
 export default function KitchenScreen() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
 
   async function fetchOrders() {
     try {
       const data = await mockFetchOrders();
-      setOrders(data.sort((a, b) => new Date(a.placedAt).getTime() - new Date(b.placedAt).getTime()));
-      setError("");
+      setOrders(
+        data.sort(
+          (a, b) =>
+            new Date(a.placedAt).getTime() - new Date(b.placedAt).getTime()
+        )
+      );
+      // setError("");
     } catch {
-      setError("Kan ikke hente ordrer");
+      // setError("Kan ikke hente ordrer");
+      console.error("Kan ikke hente ordrer");
     }
   }
 
@@ -83,7 +93,12 @@ export default function KitchenScreen() {
     return () => clearInterval(iv);
   }, []);
 
-  const statuses: Order["status"][] = ["queued", "in_progress", "ready", "complications"];
+  const statuses: Order["status"][] = [
+    "queued",
+    "in_progress",
+    "ready",
+    "complications",
+  ];
   const statusLabels: Record<Order["status"], string> = {
     queued: "Afventer",
     in_progress: "I gang",
@@ -104,11 +119,13 @@ export default function KitchenScreen() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
       {/* Ordreoversigt */}
       <main className="flex-1 p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {statuses.map((status) => (
-          <section key={status} className="bg-white rounded-lg shadow p-4 flex flex-col">
+          <section
+            key={status}
+            className="bg-white rounded-lg shadow p-4 flex flex-col"
+          >
             <h2
               className={`text-lg font-semibold mb-4 px-2 py-1 rounded text-white ${statusColors[status]}`}
             >

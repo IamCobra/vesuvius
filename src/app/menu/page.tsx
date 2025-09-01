@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Footer from "@/app/components/footer";
 import { prisma } from "@/app/lib/prisma";
 
@@ -27,7 +28,7 @@ export default async function Menu() {
   const categories = await getMenuData();
 
   // Opret "All" kategori med alle menu items
-  const allMenuItems = categories.flatMap((cat) => cat.menuItems);
+  // const allMenuItems = categories.flatMap((cat) => cat.menuItems);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,49 +56,58 @@ export default async function Menu() {
                 {category.menuItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                          {item.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                          {item.description}
-                        </p>
-
-                        {/* Variants hvis de findes */}
-                        {item.variants.length > 0 && (
-                          <div className="mb-4">
-                            <p className="text-xs text-gray-500 mb-2">
-                              Varianter:
-                            </p>
-                            <div className="flex flex-wrap gap-1">
-                              {item.variants.map((variant) => (
-                                <span
-                                  key={variant.id}
-                                  className="px-2 py-1 text-xs bg-burgundy-light text-burgundy-primary rounded"
-                                >
-                                  {variant.name}{" "}
-                                  {variant.priceChange > 0 &&
-                                    `(+${variant.priceChange} kr)`}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                    {/* Image */}
+                    {item.image && (
+                      <div className="relative h-48 w-full">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
                       </div>
+                    )}
 
-                      <div className="text-right ml-4">
-                        <span className="text-2xl font-bold text-burgundy-primary">
-                          {item.price} kr
-                        </span>
-                        <Link
-                          href="/order"
-                          className="block mt-4 bg-burgundy-primary text-white px-4 py-2 rounded-lg hover:bg-burgundy-dark transition-colors text-center text-sm font-medium"
-                        >
-                          Tilføj
-                        </Link>
+                    <div className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                            {item.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                            {item.description}
+                          </p>
+
+                          {/* Variants hvis de findes */}
+                          {item.variants.length > 0 && (
+                            <div className="mb-4">
+                              <p className="text-xs text-gray-500 mb-2">
+                                Varianter:
+                              </p>
+                              <div className="flex flex-wrap gap-1">
+                                {item.variants.map((variant) => (
+                                  <span
+                                    key={variant.id}
+                                    className="px-2 py-1 text-xs bg-burgundy-light text-burgundy-primary rounded"
+                                  >
+                                    {variant.name}{" "}
+                                    {variant.priceChange > 0 &&
+                                      `(+${variant.priceChange} kr)`}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="mt-4">
+                            <span className="text-2xl font-bold text-burgundy-primary">
+                              {item.price} kr
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -109,16 +119,16 @@ export default async function Menu() {
           {/* CTA Section */}
           <div className="text-center mt-16 p-8 bg-burgundy-primary rounded-lg">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Klar til at bestille?
+              
             </h3>
             <p className="text-burgundy-light mb-6">
-              Vælg dine yndlingsretter og afgiv din bestilling
+              Reservere mens der stadig er tider!
             </p>
             <Link
-              href="/order"
+              href="/reservation"
               className="inline-block bg-white text-burgundy-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
-              Bestil Nu
+              Reservere et bord
             </Link>
           </div>
         </div>

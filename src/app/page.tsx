@@ -38,10 +38,10 @@ export default function Home() {
               Se Vores Menu
             </a>
             <a
-              href="/order"
+              href="/reservation"
               className="w-full sm:w-auto bg-white hover:bg-gray-100 text-burgundy-primary px-8 py-4 rounded-lg font-semibold text-lg border-2 border-white transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
             >
-              Bestil Nu
+              Reserver nu
             </a>
           </div>
         </div>

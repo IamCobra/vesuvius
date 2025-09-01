@@ -1,0 +1,7 @@
+const config = {
+  seed: {
+    command: "tsx prisma/seed.ts",
+  },
+};
+
+export default config;

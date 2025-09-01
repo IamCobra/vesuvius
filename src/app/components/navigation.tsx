@@ -18,7 +18,7 @@ export default function Navigation() {
   const navigationItems = [
     { href: "/", label: "Hjem" },
     { href: "/menu", label: "Menu" },
-    { href: "/order", label: "Bestil" },
+    { href: "/reservation", label: "Reservation" },
     { href: "/contact", label: "Kontakt" },
   ];
 

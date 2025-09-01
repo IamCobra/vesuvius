@@ -55,15 +55,15 @@ function useSessionTimeout(onTimeout: () => void, timeoutMs = 30 * 60 * 1000) {
 }
 
 // RoleGuard — fetch session and ensure role === 'admin'
-async function fetchSession() {
-  try {
-    const res = await fetch("/api/auth/session");
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
+// async function fetchSession() {
+//   try {
+//     const res = await fetch("/api/auth/session");
+//     if (!res.ok) return null;
+//     return await res.json();
+//   } catch {
+//     return null;
+//   }
+// }
 
 interface Session {
   role: string;
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
       console.error(err);
     }
   };
-/*
+  /*
   // Session fetch effect
   useEffect(() => {
     let mounted = true;
@@ -180,9 +180,9 @@ export default function AdminDashboard() {
   }, []);
 */
 
-useEffect(() => {
-  setSession({ role: "admin", name: "Dev Tester" });
-  setLoadingSession(false);
+  useEffect(() => {
+    setSession({ role: "admin", name: "Dev Tester" });
+    setLoadingSession(false);
   }, []);
 
   // Data fetching effect - now includes dependencies
@@ -228,7 +228,6 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <aside className="col-span-1 bg-white rounded-lg p-4 shadow">

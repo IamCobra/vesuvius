@@ -42,7 +42,7 @@ const openingHours = [
 
 const quickLinks = [
   { name: "About Us", href: "/about" },
-  { name: "Make a Booking", href: "/order" },
+  { name: "Make a Booking", href: "/reservation" },
   { name: "Menu", href: "/menu" },
   { name: "Contact Us", href: "/contact" },
 ];
