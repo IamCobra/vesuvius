@@ -65,46 +65,6 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-16 px-4 bg-gradient-to-br from-burgundy-light to-burgundy-primary">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
-            Ofte Stillede Spørgsmål
-          </h2>
-          <div className="space-y-6">
-            {[
-              {
-                question: "Tager I imod reservationer?",
-                answer:
-                  "Ja! Vi anbefaler stærkt at lave reservationer, især til aftenservice og weekender. Du kan ringe til os eller bruge vores kontaktformular ovenfor.",
-              },
-              {
-                question: "Tilbyder I catering services?",
-                answer:
-                  "Absolut! Vi leverer catering til events af alle størrelser. Kontakt os venligst med dine event detaljer og vi vil lave en specialmenu til dig.",
-              },
-              {
-                question: "Kan I håndtere diætbegrænsninger?",
-                answer:
-                  "Ja, vi kan imødekomme de fleste diætbegrænsninger inklusive vegetarisk, vegansk, glutenfri og almindelige allergier. Informer os venligst når du laver din reservation.",
-              },
-              {
-                question: "Hvilke parkeringsmuligheder har I?",
-                answer:
-                  "Vi har en lille parkeringsplads bag restauranten, og der er også gadeparkering tilgængelig. Vi er også tilgængelige med offentlig transport.",
-              },
-            ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                  {faq.question}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );
