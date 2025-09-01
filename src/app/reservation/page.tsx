@@ -16,6 +16,50 @@ export default function Reservation() {
     phone: "",
   });
 
+  // Available time slots for dinner service
+  const availableTimeSlots = [
+    "17:00", "17:15", "17:30", "17:45",
+    "18:00", "18:15", "18:30", "18:45", 
+    "19:00", "19:15", "19:30", "19:45",
+    "20:00", "20:15", "20:30", "20:45",
+    "21:00", "21:15", "21:30"
+  ];
+
+  // Get minimum date (today)
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  // Check if selected date is valid (not in the past)
+  const isValidDate = (dateString: string) => {
+    if (!dateString) return true; // Allow empty for now
+    const selectedDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return selectedDate >= today;
+  };
+
+  // Check if selected time is valid (not in the past if today)
+  const isValidTime = (timeString: string, dateString: string) => {
+    if (!timeString || !dateString) return true;
+    
+    const selectedDate = new Date(dateString);
+    const today = new Date();
+    
+    // If not today, all times are valid
+    if (selectedDate.toDateString() !== today.toDateString()) {
+      return true;
+    }
+    
+    // If today, check if time is in the future
+    const [hours, minutes] = timeString.split(":").map(Number);
+    const selectedTime = new Date();
+    selectedTime.setHours(hours, minutes, 0, 0);
+    
+    return selectedTime > today;
+  };
+
   const handleModalNext = () => {
     if (modalStep < 2) {
       setModalStep(modalStep + 1);
@@ -30,8 +74,20 @@ export default function Reservation() {
 
   const handleReservationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Final validation before submission
+    if (!isValidDate(reservationData.date)) {
+      alert("Ugyldig dato valgt. Vælg venligst en dato i fremtiden.");
+      return;
+    }
+    
+    if (!isValidTime(reservationData.time, reservationData.date)) {
+      alert("Ugyldig tid valgt. Tidspunktet er allerede passeret.");
+      return;
+    }
+    
     console.log("Reservation:", reservationData);
-    setModalStep(3); // Go to confirmation step instead of closing
+    setModalStep(3); // Go to confirmation step
   };
 
   const handleFinalConfirmation = () => {
@@ -52,6 +108,32 @@ export default function Reservation() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Handle date change with validation
+  const handleDateChange = (dateString: string) => {
+    updateReservationData("date", dateString);
+    
+    // Reset time if date changes and current time is invalid for new date
+    if (reservationData.time && !isValidTime(reservationData.time, dateString)) {
+      updateReservationData("time", "");
+    }
+  };
+
+  // Handle time selection with validation
+  const handleTimeSelect = (timeString: string) => {
+    if (isValidTime(timeString, reservationData.date)) {
+      updateReservationData("time", timeString);
+    }
+  };
+
+  // Get filtered time slots based on selected date
+  const getAvailableTimeSlotsForDate = () => {
+    if (!reservationData.date) return availableTimeSlots;
+    
+    return availableTimeSlots.filter(time => 
+      isValidTime(time, reservationData.date)
+    );
   };
 
   return (
@@ -199,78 +281,90 @@ export default function Reservation() {
                   {/* Date */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Dato
+                      Dato *
                     </label>
                     <input
                       type="date"
                       value={reservationData.date}
-                      onChange={(e) =>
-                        updateReservationData("date", e.target.value)
-                      }
-                      min={new Date().toISOString().split("T")[0]}
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-burgundy-primary focus:border-transparent bg-white text-gray-900 transition-colors"
+                      onChange={(e) => handleDateChange(e.target.value)}
+                      min={getMinDate()}
+                      onClick={(e) => {
+                        // Auto-open date picker (works in most modern browsers)
+                        try {
+                          e.currentTarget.showPicker?.();
+                        } catch {
+                          // Fallback for browsers that don't support showPicker
+                          console.log("Date picker auto-open not supported");
+                        }
+                      }}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-burgundy-primary focus:border-transparent bg-white text-gray-900 transition-colors cursor-pointer hover:bg-gray-50"
+                      required
                     />
+                    {reservationData.date && !isValidDate(reservationData.date) && (
+                      <p className="text-red-500 text-sm mt-1">
+                        Vælg venligst en dato i fremtiden
+                      </p>
+                    )}
                   </div>
 
-                  {/* Time */}
+                  {/* Time Selection - Visual Buttons */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tid
+                      Tid * {reservationData.date && (
+                        <span className="text-gray-500 text-xs">
+                          ({getAvailableTimeSlotsForDate().length} ledige tider)
+                        </span>
+                      )}
                     </label>
-                    <select
-                      value={reservationData.time}
-                      onChange={(e) =>
-                        updateReservationData("time", e.target.value)
-                      }
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-burgundy-primary focus:border-transparent bg-white text-gray-900 transition-colors"
-                    >
-                      <option value="">Vælg tid</option>
-                      <option value="17:00">11:00</option>
-                      <option value="17:30">11:15</option>
-                      <option value="18:00">11:30</option>
-                      <option value="18:30">11:45</option>
-                      <option value="19:00">12:00</option>
-                      <option value="19:30">12:15</option>
-                      <option value="20:00">12:30</option>
-                      <option value="20:30">12:45</option>
-                      <option value="21:00">13:00</option>
-                      <option value="21:30">13:15</option>
-                      <option value="18:30">13:30</option>
-                      <option value="19:00">13:45</option>
-                      <option value="19:30">14:00</option>
-                      <option value="20:00">14:15</option>
-                      <option value="20:30">14:30</option>
-                      <option value="21:00">14:45</option>
-                      <option value="21:30">15:00</option>
-                      <option value="17:00">15:15</option>
-                      <option value="17:30">15:30</option>
-                      <option value="18:00">15:45</option>
-                      <option value="18:30">16:00</option>
-                      <option value="19:00">16:15</option>
-                      <option value="19:30">16:30</option>
-                      <option value="20:00">16:45</option>
-                      <option value="20:30">17:00</option>
-                      <option value="20:00">17:15</option>
-                      <option value="20:30">17:30</option>
-                      <option value="21:00">17:45</option>
-                      <option value="21:30">18:00</option>
-                      <option value="18:30">18:15</option>
-                      <option value="19:00">18:30</option>
-                      <option value="19:30">18:45</option>
-                      <option value="20:00">19:00</option>
-                      <option value="20:30">19:15</option>
-                      <option value="21:00">19:30</option>
-                      <option value="21:30">19:45</option>
-                      <option value="21:30">20:00</option>
-                    </select>
+                    
+                    {!reservationData.date ? (
+                      <div className="text-gray-500 text-sm bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        Vælg først en dato for at se ledige tider
+                      </div>
+                    ) : getAvailableTimeSlotsForDate().length === 0 ? (
+                      <div className="text-red-500 text-sm bg-red-50 p-4 rounded-xl border border-red-200">
+                        Ingen ledige tider for denne dato. Vælg en anden dag.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                        {getAvailableTimeSlotsForDate().map((time) => (
+                          <button
+                            key={time}
+                            type="button"
+                            onClick={() => handleTimeSelect(time)}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              reservationData.time === time
+                                ? "bg-burgundy-primary text-white shadow-md ring-2 ring-burgundy-primary ring-offset-2"
+                                : "bg-gray-100 text-gray-700 hover:bg-burgundy-light hover:text-burgundy-dark border border-gray-200"
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {reservationData.time && (
+                      <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-lg border border-green-200">
+                        ✓ Valgt tid: {reservationData.time}
+                      </div>
+                    )}
                   </div>
 
                   <button
                     onClick={handleModalNext}
-                    disabled={!reservationData.date || !reservationData.time}
-                    className="w-full bg-gradient-to-r from-burgundy-primary to-burgundy-dark text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]"
+                    disabled={
+                      !reservationData.date || 
+                      !reservationData.time || 
+                      !isValidDate(reservationData.date) ||
+                      !isValidTime(reservationData.time, reservationData.date)
+                    }
+                    className="w-full bg-gradient-to-r from-burgundy-primary to-burgundy-dark text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] disabled:transform-none disabled:hover:scale-100"
                   >
-                    Fortsæt til kontaktinfo
+                    {!reservationData.date || !reservationData.time
+                      ? "Vælg dato og tid"
+                      : "Fortsæt til kontaktinfo"
+                    }
                   </button>
                 </div>
               )}
