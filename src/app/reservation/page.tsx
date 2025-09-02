@@ -2,11 +2,23 @@
 
 import Image from "next/image";
 import Footer from "@/app/components/footer";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 export default function Reservation() {
   const [showModal, setShowModal] = useState(false);
   const [modalStep, setModalStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [reservationResult, setReservationResult] = useState<{
+    success: boolean;
+    reservationId?: string;
+    message: string;
+    tables?: Array<{ tableNumber: number; seats: number }>;
+  } | null>(null);
+  const [availabilityData, setAvailabilityData] = useState<{
+    [key: string]: boolean; // "YYYY-MM-DD:HH:MM" -> available
+  }>({});
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [reservationData, setReservationData] = useState({
     guests: 2,
     date: "",
@@ -16,14 +28,31 @@ export default function Reservation() {
     phone: "",
   });
 
-  // Available time slots for dinner service
-  const availableTimeSlots = [
-    "17:00", "17:15", "17:30", "17:45",
-    "18:00", "18:15", "18:30", "18:45", 
-    "19:00", "19:15", "19:30", "19:45",
-    "20:00", "20:15", "20:30", "20:45",
-    "21:00", "21:15", "21:30"
-  ];
+  // Available time slots for dinner service - memoized to prevent useEffect dependency issues
+  const availableTimeSlots = useMemo(
+    () => [
+      "17:00",
+      "17:15",
+      "17:30",
+      "17:45",
+      "18:00",
+      "18:15",
+      "18:30",
+      "18:45",
+      "19:00",
+      "19:15",
+      "19:30",
+      "19:45",
+      "20:00",
+      "20:15",
+      "20:30",
+      "20:45",
+      "21:00",
+      "21:15",
+      "21:30",
+    ],
+    []
+  );
 
   // Get minimum date (today)
   const getMinDate = () => {
@@ -43,20 +72,20 @@ export default function Reservation() {
   // Check if selected time is valid (not in the past if today)
   const isValidTime = (timeString: string, dateString: string) => {
     if (!timeString || !dateString) return true;
-    
+
     const selectedDate = new Date(dateString);
     const today = new Date();
-    
+
     // If not today, all times are valid
     if (selectedDate.toDateString() !== today.toDateString()) {
       return true;
     }
-    
+
     // If today, check if time is in the future
     const [hours, minutes] = timeString.split(":").map(Number);
     const selectedTime = new Date();
     selectedTime.setHours(hours, minutes, 0, 0);
-    
+
     return selectedTime > today;
   };
 
@@ -72,27 +101,83 @@ export default function Reservation() {
     }
   };
 
-  const handleReservationSubmit = (e: React.FormEvent) => {
+  const handleReservationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setSubmitError("");
+
     // Final validation before submission
     if (!isValidDate(reservationData.date)) {
-      alert("Ugyldig dato valgt. Vælg venligst en dato i fremtiden.");
+      setSubmitError("Ugyldig dato valgt. Vælg venligst en dato i fremtiden.");
       return;
     }
-    
+
     if (!isValidTime(reservationData.time, reservationData.date)) {
-      alert("Ugyldig tid valgt. Tidspunktet er allerede passeret.");
+      setSubmitError("Ugyldig tid valgt. Tidspunktet er allerede passeret.");
       return;
     }
-    
-    console.log("Reservation:", reservationData);
-    setModalStep(3); // Go to confirmation step
+
+    // Check if time is still available (double-check)
+    if (!isTimeSlotAvailable(reservationData.time)) {
+      setSubmitError(
+        "Dette tidspunkt er desværre ikke længere ledigt. Vælg venligst et andet tidspunkt."
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: reservationData.date,
+          time: reservationData.time,
+          partySize: reservationData.guests,
+          customerData: {
+            firstName:
+              reservationData.name.split(" ")[0] || reservationData.name,
+            lastName: reservationData.name.split(" ").slice(1).join(" ") || ".",
+            email: reservationData.email,
+            phone: reservationData.phone,
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setReservationResult(result);
+        setModalStep(3); // Go to confirmation step
+
+        // Invalidate availability cache for this date to reflect the new reservation
+        const newAvailabilityData = { ...availabilityData };
+        const key = `${reservationData.date}:${reservationData.time}`;
+        newAvailabilityData[key] = false; // Mark as unavailable
+        setAvailabilityData(newAvailabilityData);
+      } else {
+        setSubmitError(
+          result.message ||
+            "Der opstod en fejl ved oprettelse af reservationen."
+        );
+      }
+    } catch (error) {
+      console.error("Reservation error:", error);
+      setSubmitError(
+        "Der opstod en fejl ved oprettelse af reservationen. Prøv venligst igen."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFinalConfirmation = () => {
     setShowModal(false);
     setModalStep(1);
+    setReservationResult(null);
+    setSubmitError("");
     setReservationData({
       guests: 2,
       date: "",
@@ -101,6 +186,8 @@ export default function Reservation() {
       email: "",
       phone: "",
     });
+    // Clear availability cache to force refresh
+    setAvailabilityData({});
   };
 
   const updateReservationData = (field: string, value: string | number) => {
@@ -110,29 +197,130 @@ export default function Reservation() {
     }));
   };
 
-  // Handle date change with validation
-  const handleDateChange = (dateString: string) => {
-    updateReservationData("date", dateString);
-    
-    // Reset time if date changes and current time is invalid for new date
-    if (reservationData.time && !isValidTime(reservationData.time, dateString)) {
+  // Load availability for all time slots when date or guests change
+  useEffect(() => {
+    const loadAvailabilityForDate = async () => {
+      if (!reservationData.date) {
+        console.log("🔍 No date selected, skipping availability check");
+        return;
+      }
+
+      console.log(
+        `🔍 Loading availability for ${reservationData.date} with ${reservationData.guests} guests`
+      );
+      setIsCheckingAvailability(true);
+
+      const validTimeSlots = availableTimeSlots.filter((time) =>
+        isValidTime(time, reservationData.date)
+      );
+
+      console.log(
+        `🔍 Checking ${validTimeSlots.length} valid time slots:`,
+        validTimeSlots
+      );
+
+      // Check availability for all valid time slots
+      const checks = validTimeSlots.map(async (time) => {
+        const key = `${reservationData.date}:${time}`;
+        try {
+          const url = `/api/reservations?date=${reservationData.date}&time=${time}&partySize=${reservationData.guests}`;
+          console.log(`📞 API call: ${url}`);
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          console.log(`📊 Response for ${time}:`, data);
+
+          return {
+            key,
+            available: data.success && data.available,
+          };
+        } catch (error) {
+          console.error(`❌ Error checking availability for ${time}:`, error);
+          return { key, available: false };
+        }
+      });
+
+      const results = await Promise.all(checks);
+
+      // Update availability data
+      const newAvailabilityData: { [key: string]: boolean } = {};
+      results.forEach(({ key, available }) => {
+        newAvailabilityData[key] = available;
+      });
+
+      console.log("📊 Final availability data:", newAvailabilityData);
+
+      setAvailabilityData((prev) => ({
+        ...prev,
+        ...newAvailabilityData,
+      }));
+
+      setIsCheckingAvailability(false);
+    };
+
+    loadAvailabilityForDate();
+  }, [reservationData.date, reservationData.guests, availableTimeSlots]);
+
+  // Handle guest count change with availability cache clearing
+  const handleGuestChange = (guestCount: number) => {
+    updateReservationData("guests", guestCount);
+
+    // Clear availability cache when guest count changes
+    setAvailabilityData({});
+
+    // Reset time if current selection might not be available for new guest count
+    if (reservationData.time && reservationData.date) {
+      // We'll let the useEffect re-check availability
       updateReservationData("time", "");
     }
   };
 
-  // Handle time selection with validation
+  // Check if a specific time slot is available
+  const isTimeSlotAvailable = (time: string) => {
+    if (!reservationData.date) return true;
+
+    const key = `${reservationData.date}:${time}`;
+    const available = availabilityData[key];
+
+    // If we don't have data yet, assume available (will be checked when loaded)
+    return available !== false;
+  };
+
+  // Handle date change with validation and clear availability cache
+  const handleDateChange = (dateString: string) => {
+    updateReservationData("date", dateString);
+
+    // Reset time if date changes and current time is invalid for new date
+    if (
+      reservationData.time &&
+      (!isValidTime(reservationData.time, dateString) ||
+        !isTimeSlotAvailable(reservationData.time))
+    ) {
+      updateReservationData("time", "");
+    }
+
+    // Clear availability cache when date changes
+    setAvailabilityData({});
+  };
+
+  // Handle time selection with validation and availability check
   const handleTimeSelect = (timeString: string) => {
-    if (isValidTime(timeString, reservationData.date)) {
+    if (
+      isValidTime(timeString, reservationData.date) &&
+      isTimeSlotAvailable(timeString)
+    ) {
       updateReservationData("time", timeString);
     }
   };
 
-  // Get filtered time slots based on selected date
+  // Get filtered time slots based on selected date and availability
   const getAvailableTimeSlotsForDate = () => {
     if (!reservationData.date) return availableTimeSlots;
-    
-    return availableTimeSlots.filter(time => 
-      isValidTime(time, reservationData.date)
+
+    return availableTimeSlots.filter(
+      (time) =>
+        isValidTime(time, reservationData.date) && isTimeSlotAvailable(time)
     );
   };
 
@@ -263,10 +451,7 @@ export default function Reservation() {
                     <select
                       value={reservationData.guests}
                       onChange={(e) =>
-                        updateReservationData(
-                          "guests",
-                          parseInt(e.target.value)
-                        )
+                        handleGuestChange(parseInt(e.target.value))
                       }
                       className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-burgundy-primary focus:border-transparent bg-white text-gray-900 transition-colors"
                     >
@@ -300,23 +485,25 @@ export default function Reservation() {
                       className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-burgundy-primary focus:border-transparent bg-white text-gray-900 transition-colors cursor-pointer hover:bg-gray-50"
                       required
                     />
-                    {reservationData.date && !isValidDate(reservationData.date) && (
-                      <p className="text-red-500 text-sm mt-1">
-                        Vælg venligst en dato i fremtiden
-                      </p>
-                    )}
+                    {reservationData.date &&
+                      !isValidDate(reservationData.date) && (
+                        <p className="text-red-500 text-sm mt-1">
+                          Vælg venligst en dato i fremtiden
+                        </p>
+                      )}
                   </div>
 
                   {/* Time Selection - Visual Buttons */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tid * {reservationData.date && (
+                      Tid *{" "}
+                      {reservationData.date && (
                         <span className="text-gray-500 text-xs">
                           ({getAvailableTimeSlotsForDate().length} ledige tider)
                         </span>
                       )}
                     </label>
-                    
+
                     {!reservationData.date ? (
                       <div className="text-gray-500 text-sm bg-gray-50 p-4 rounded-xl border border-gray-200">
                         Vælg først en dato for at se ledige tider
@@ -326,24 +513,68 @@ export default function Reservation() {
                         Ingen ledige tider for denne dato. Vælg en anden dag.
                       </div>
                     ) : (
-                      <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                        {getAvailableTimeSlotsForDate().map((time) => (
-                          <button
-                            key={time}
-                            type="button"
-                            onClick={() => handleTimeSelect(time)}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                              reservationData.time === time
-                                ? "bg-burgundy-primary text-white shadow-md ring-2 ring-burgundy-primary ring-offset-2"
-                                : "bg-gray-100 text-gray-700 hover:bg-burgundy-light hover:text-burgundy-dark border border-gray-200"
-                            }`}
-                          >
-                            {time}
-                          </button>
-                        ))}
+                      <div>
+                        <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                          {availableTimeSlots
+                            .filter((time) =>
+                              isValidTime(time, reservationData.date)
+                            )
+                            .map((time) => {
+                              const isAvailable = isTimeSlotAvailable(time);
+                              const isSelected = reservationData.time === time;
+
+                              return (
+                                <button
+                                  key={time}
+                                  type="button"
+                                  onClick={() =>
+                                    isAvailable
+                                      ? handleTimeSelect(time)
+                                      : undefined
+                                  }
+                                  disabled={!isAvailable}
+                                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    isSelected && isAvailable
+                                      ? "bg-burgundy-primary text-white shadow-md ring-2 ring-burgundy-primary ring-offset-2"
+                                      : isAvailable
+                                      ? "bg-gray-100 text-gray-700 hover:bg-burgundy-light hover:text-burgundy-dark border border-gray-200 cursor-pointer"
+                                      : "bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed"
+                                  }`}
+                                  title={
+                                    isAvailable
+                                      ? `Ledig tid: ${time}`
+                                      : `Optaget: ${time}`
+                                  }
+                                >
+                                  {time}
+                                  {!isAvailable && (
+                                    <span className="ml-1 text-xs">×</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                        </div>
+
+                        {isCheckingAvailability && (
+                          <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-200">
+                            🔍 Tjekker ledige tider...
+                          </div>
+                        )}
+
+                        {!isCheckingAvailability &&
+                          availableTimeSlots.filter(
+                            (time) =>
+                              isValidTime(time, reservationData.date) &&
+                              isTimeSlotAvailable(time)
+                          ).length === 0 && (
+                            <div className="mt-2 text-red-500 text-sm bg-red-50 p-4 rounded-xl border border-red-200">
+                              Ingen ledige tider for denne dato og antal gæster.
+                              Prøv en anden dag eller færre gæster.
+                            </div>
+                          )}
                       </div>
                     )}
-                    
+
                     {reservationData.time && (
                       <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-lg border border-green-200">
                         ✓ Valgt tid: {reservationData.time}
@@ -354,8 +585,8 @@ export default function Reservation() {
                   <button
                     onClick={handleModalNext}
                     disabled={
-                      !reservationData.date || 
-                      !reservationData.time || 
+                      !reservationData.date ||
+                      !reservationData.time ||
                       !isValidDate(reservationData.date) ||
                       !isValidTime(reservationData.time, reservationData.date)
                     }
@@ -363,8 +594,7 @@ export default function Reservation() {
                   >
                     {!reservationData.date || !reservationData.time
                       ? "Vælg dato og tid"
-                      : "Fortsæt til kontaktinfo"
-                    }
+                      : "Fortsæt til kontaktinfo"}
                   </button>
                 </div>
               )}
@@ -436,19 +666,53 @@ export default function Reservation() {
                     />
                   </div>
 
+                  {submitError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+                      {submitError}
+                    </div>
+                  )}
+
                   <div className="flex space-x-4 pt-4">
                     <button
                       type="button"
                       onClick={handleModalBack}
-                      className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Tilbage
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-burgundy-primary to-burgundy-dark text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-gradient-to-r from-burgundy-primary to-burgundy-dark text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      Bekræft Reservation
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center">
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Opretter reservation...
+                        </span>
+                      ) : (
+                        "Bekræft Reservation"
+                      )}
                     </button>
                   </div>
                 </form>
@@ -473,81 +737,126 @@ export default function Reservation() {
                   </div>
 
                   <h3 className="text-2xl font-bold text-burgundy-primary mb-4">
-                    Reservation Bekræftet!
+                    {reservationResult?.success
+                      ? "Reservation Bekræftet!"
+                      : "Reservation Fejlede"}
                   </h3>
 
                   <p className="text-lg text-gray-600 mb-6">
-                    Tak for din reservation hos Vesuvius. Vi glæder os til at se
-                    dig!
+                    {reservationResult?.success
+                      ? "Tak for din reservation hos Vesuvius. Vi glæder os til at se dig!"
+                      : reservationResult?.message ||
+                        "Der opstod en fejl ved oprettelse af reservationen."}
                   </p>
 
-                  {/* Reservation Details */}
-                  <div className="bg-gradient-to-r from-burgundy-light to-burgundy-primary/10 p-6 rounded-2xl mb-6">
-                    <h4 className="font-bold text-burgundy-primary text-xl mb-4">
-                      Reservationsdetaljer
-                    </h4>
+                  {reservationResult?.success && (
+                    <>
+                      {/* Reservation Details */}
+                      <div className="bg-gradient-to-r from-burgundy-light to-burgundy-primary/10 p-6 rounded-2xl mb-6">
+                        <h4 className="font-bold text-burgundy-primary text-xl mb-4">
+                          Reservationsdetaljer
+                        </h4>
 
-                    <div className="space-y-3 text-left">
-                      <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
-                        <span className="font-medium text-gray-700">Navn:</span>
-                        <span className="text-burgundy-primary font-semibold">
-                          {reservationData.name}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
-                        <span className="font-medium text-gray-700">
-                          Email:
-                        </span>
-                        <span className="text-burgundy-primary">
-                          {reservationData.email}
-                        </span>
-                      </div>
-
-                      {reservationData.phone && (
-                        <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
-                          <span className="font-medium text-gray-700">
-                            Telefon:
-                          </span>
-                          <span className="text-burgundy-primary">
-                            {reservationData.phone}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
-                        <span className="font-medium text-gray-700">Dato:</span>
-                        <span className="text-burgundy-primary font-semibold">
-                          {new Date(reservationData.date).toLocaleDateString(
-                            "da-DK",
-                            {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
+                        <div className="space-y-3 text-left">
+                          {reservationResult.reservationId && (
+                            <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                              <span className="font-medium text-gray-700">
+                                Reservationsnr:
+                              </span>
+                              <span className="text-burgundy-primary font-mono text-sm">
+                                {reservationResult.reservationId
+                                  .slice(-8)
+                                  .toUpperCase()}
+                              </span>
+                            </div>
                           )}
-                        </span>
-                      </div>
 
-                      <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
-                        <span className="font-medium text-gray-700">Tid:</span>
-                        <span className="text-burgundy-primary font-semibold">
-                          {reservationData.time}
-                        </span>
-                      </div>
+                          <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                            <span className="font-medium text-gray-700">
+                              Navn:
+                            </span>
+                            <span className="text-burgundy-primary font-semibold">
+                              {reservationData.name}
+                            </span>
+                          </div>
 
-                      <div className="flex justify-between items-center py-2">
-                        <span className="font-medium text-gray-700">
-                          Antal gæster:
-                        </span>
-                        <span className="text-burgundy-primary font-semibold">
-                          {reservationData.guests}{" "}
-                          {reservationData.guests === 1 ? "person" : "personer"}
-                        </span>
+                          <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                            <span className="font-medium text-gray-700">
+                              Email:
+                            </span>
+                            <span className="text-burgundy-primary">
+                              {reservationData.email}
+                            </span>
+                          </div>
+
+                          {reservationData.phone && (
+                            <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                              <span className="font-medium text-gray-700">
+                                Telefon:
+                              </span>
+                              <span className="text-burgundy-primary">
+                                {reservationData.phone}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                            <span className="font-medium text-gray-700">
+                              Dato:
+                            </span>
+                            <span className="text-burgundy-primary font-semibold">
+                              {new Date(
+                                reservationData.date
+                              ).toLocaleDateString("da-DK", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                            <span className="font-medium text-gray-700">
+                              Tid:
+                            </span>
+                            <span className="text-burgundy-primary font-semibold">
+                              {reservationData.time}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center py-2">
+                            <span className="font-medium text-gray-700">
+                              Antal gæster:
+                            </span>
+                            <span className="text-burgundy-primary font-semibold">
+                              {reservationData.guests}{" "}
+                              {reservationData.guests === 1
+                                ? "person"
+                                : "personer"}
+                            </span>
+                          </div>
+
+                          {reservationResult.tables &&
+                            reservationResult.tables.length > 0 && (
+                              <div className="flex justify-between items-center py-2 border-t border-burgundy-primary/20 pt-3">
+                                <span className="font-medium text-gray-700">
+                                  Tildelte borde:
+                                </span>
+                                <span className="text-burgundy-primary font-semibold">
+                                  {reservationResult.tables
+                                    .map(
+                                      (t) =>
+                                        `Bord #${t.tableNumber} (${t.seats} pladser)`
+                                    )
+                                    .join(", ")}
+                                </span>
+                              </div>
+                            )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
 
                   <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 mb-6">
                     <p className="mb-2">

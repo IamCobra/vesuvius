@@ -66,13 +66,12 @@ model Customer {
   @@map("customers")
 }
 
-// Time Slot Management (from your ReservationTimes)
+// Time Slot Management (kept for UI display, not used for reservations)
 model TimeSlot {
   id           String        @id @default(cuid())
   startTime    String        // "17:00"
   endTime      String        // "19:00"
   maxTables    Int           @default(10) // Maximum available tables for this slot
-  reservations Reservation[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -83,45 +82,53 @@ model TimeSlot {
 model DiningTable {
   id               String             @id @default(cuid())
   tableNumber      Int                @unique
-  seats            Int                @default(4) // Number of seats per table
-  reservedTables   ReservedTable[]
+  seats            Int                @default(4) // Number of seats per table (2, 4, 6, 8)
+  reserved         ReservedTable[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
   @@map("dining_tables")
 }
 
-// Enhanced Reservations (combining your approach with current)
+// Enhanced Reservations with rolling 120-minute window
 model Reservation {
-  id            String             @id @default(cuid())
-  partySize     Int
-  reservationDate DateTime         // Date of reservation
-  customerId    String
-  customer      Customer           @relation(fields: [customerId], references: [id])
-  timeSlotId    String
-  timeSlot      TimeSlot           @relation(fields: [timeSlotId], references: [id])
-  status        ReservationStatus  @default(CONFIRMED)
+  id           String             @id @default(cuid())
+  partySize    Int
+  // Start of seating window (UTC). End is start + dwellMinutes (e.g. 120).
+  slotStartUtc DateTime
+  slotEndUtc   DateTime           // derived on create (slotStartUtc + 120 minutes)
+  customerId   String?
+  customer     Customer?          @relation(fields: [customerId], references: [id])
+  status       ReservationStatus  @default(CONFIRMED)
+  reserved     ReservedTable[]
   
   // Relations from your SQL
-  reservedTables ReservedTable[]
-  orders         Order[]
+  orders       Order[]
   
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  @@index([reservationDate, timeSlotId])
+  @@index([slotStartUtc])
+  @@index([slotEndUtc])
   @@map("reservations")
 }
 
-// Junction table for reservations and tables (many-to-many)
+// Junction table for reservations and tables with overlap prevention
 model ReservedTable {
   id            String      @id @default(cuid())
+  
+  // Duped onto this row so Postgres can enforce overlap per table:
+  startUtc      DateTime
+  endUtc        DateTime
+
   reservationId String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
   tableId       String
   table         DiningTable @relation(fields: [tableId], references: [id])
-  
+
   @@unique([reservationId, tableId])
+  // NOTE: the "no overlap" rule is added via a raw SQL migration (exclusion constraint)
   @@map("reserved_tables")
 }
 
