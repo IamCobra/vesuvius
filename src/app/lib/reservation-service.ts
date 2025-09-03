@@ -30,9 +30,7 @@ export class ReservationService {
     slotStart: Date,
     diningMinutes: number = 120
   ): Promise<TableAssignment[]> {
-    const slotEnd = new Date(
-      slotStart.getTime() + diningMinutes * 60 * 1000
-    );
+    const slotEnd = new Date(slotStart.getTime() + diningMinutes * 60 * 1000);
 
     // Find tables NOT reserved during the requested time window
     const availableTables = await prisma.diningTable.findMany({
