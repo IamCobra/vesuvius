@@ -10,7 +10,7 @@ interface TableAssignment {
 
 interface ReservationRequest {
   partySize: number;
-  slotStartUtc: Date;
+  slotStart: Date;
   customerId?: string;
   customerData?: {
     firstName: string;
@@ -49,167 +49,22 @@ export class ReservationService {
       orderBy: [{ seats: "asc" }, { tableNumber: "asc" }],
     });
 
-    // 2-top combination strategy:
-    // Prefer combining 2-person tables for optimal restaurant operations
+    // Simplified 2-top combination strategy:
+    // All tables are 2-person, so we just combine as many as needed
 
-    if (partySize <= 2) {
-      // Use single 2-top
-      const twoTop = availableTables.find((t) => t.seats === 2);
-      if (twoTop) {
-        return [
-          {
-            tableId: twoTop.id,
-            seats: twoTop.seats,
-            tableNumber: twoTop.tableNumber,
-          },
-        ];
-      }
-      // Fallback to larger table if no 2-top available
-      const fallback = availableTables.find((t) => t.seats >= 2);
-      if (fallback) {
-        return [
-          {
-            tableId: fallback.id,
-            seats: fallback.seats,
-            tableNumber: fallback.tableNumber,
-          },
-        ];
-      }
-    } else if (partySize <= 4) {
-      // Prefer 2 x 2-tops, fallback to single 4-top or larger
-      const twoTops = availableTables.filter((t) => t.seats === 2);
-      if (twoTops.length >= 2) {
-        return twoTops.slice(0, 2).map((table) => ({
-          tableId: table.id,
-          seats: table.seats,
-          tableNumber: table.tableNumber,
-        }));
-      }
-      // Fallback to single larger table
-      const fallback = availableTables.find((t) => t.seats >= partySize);
-      if (fallback) {
-        return [
-          {
-            tableId: fallback.id,
-            seats: fallback.seats,
-            tableNumber: fallback.tableNumber,
-          },
-        ];
-      }
-    } else if (partySize <= 6) {
-      // Prefer 3 x 2-tops, fallback to 6-top or larger
-      const twoTops = availableTables.filter((t) => t.seats === 2);
-      if (twoTops.length >= 3) {
-        return twoTops.slice(0, 3).map((table) => ({
-          tableId: table.id,
-          seats: table.seats,
-          tableNumber: table.tableNumber,
-        }));
-      }
-      // Fallback to single larger table
-      const fallback = availableTables.find((t) => t.seats >= partySize);
-      if (fallback) {
-        return [
-          {
-            tableId: fallback.id,
-            seats: fallback.seats,
-            tableNumber: fallback.tableNumber,
-          },
-        ];
-      }
-    } else if (partySize <= 8) {
-      // Prefer 4 x 2-tops, fallback to 8-top or combinations
-      const twoTops = availableTables.filter((t) => t.seats === 2);
-      if (twoTops.length >= 4) {
-        return twoTops.slice(0, 4).map((table) => ({
-          tableId: table.id,
-          seats: table.seats,
-          tableNumber: table.tableNumber,
-        }));
-      }
-      // Fallback to 8-top
-      const eightTop = availableTables.find((t) => t.seats === 8);
-      if (eightTop) {
-        return [
-          {
-            tableId: eightTop.id,
-            seats: eightTop.seats,
-            tableNumber: eightTop.tableNumber,
-          },
-        ];
-      }
-      // Try other combinations (4-top + 2 x 2-tops, etc.)
-      const combinations = this.findOptimalTableCombination(
-        availableTables,
-        partySize
-      );
-      if (combinations.length > 0) {
-        return combinations;
-      }
-    } else {
-      // For very large parties, find best combination
-      const combinations = this.findOptimalTableCombination(
-        availableTables,
-        partySize
-      );
-      if (combinations.length > 0) {
-        return combinations;
-      }
+    // Calculate how many tables we need (round up for odd numbers)
+    const tablesNeeded = Math.ceil(partySize / 2);
+    
+    // Check if we have enough available tables
+    if (availableTables.length >= tablesNeeded) {
+      return availableTables.slice(0, tablesNeeded).map((table) => ({
+        tableId: table.id,
+        seats: table.seats,
+        tableNumber: table.tableNumber,
+      }));
     }
 
     return []; // No availability
-  }
-
-  /**
-   * Find optimal table combinations prioritizing 2-person tables
-   * Uses intelligent combination strategy for restaurant efficiency
-   */
-  private static findOptimalTableCombination(
-    availableTables: { id: string; seats: number; tableNumber: number }[],
-    partySize: number
-  ): TableAssignment[] {
-    // Strategy: Prioritize 2-person tables, then fill with larger tables
-    const twoTops = availableTables.filter((t) => t.seats === 2);
-    const otherTables = availableTables
-      .filter((t) => t.seats !== 2)
-      .sort((a, b) => a.seats - b.seats);
-
-    const combination: TableAssignment[] = [];
-    let remainingSeats = partySize;
-
-    // First, use as many 2-tops as possible
-    const maxTwoTops = Math.floor(remainingSeats / 2);
-    const availableTwoTops = Math.min(maxTwoTops, twoTops.length);
-
-    for (let i = 0; i < availableTwoTops; i++) {
-      combination.push({
-        tableId: twoTops[i].id,
-        seats: twoTops[i].seats,
-        tableNumber: twoTops[i].tableNumber,
-      });
-      remainingSeats -= 2;
-    }
-
-    // If we still need seats, add the smallest suitable table
-    if (remainingSeats > 0) {
-      const suitableTable = otherTables.find((t) => t.seats >= remainingSeats);
-      if (suitableTable) {
-        combination.push({
-          tableId: suitableTable.id,
-          seats: suitableTable.seats,
-          tableNumber: suitableTable.tableNumber,
-        });
-        remainingSeats = 0;
-      }
-    }
-
-    // Restaurant policy: don't combine more than 4 tables
-    // and ensure we can actually seat everyone
-    if (combination.length <= 4 && remainingSeats <= 0) {
-      return combination;
-    }
-
-    return []; // Cannot accommodate with our combination strategy
   }
 
   /**
@@ -222,26 +77,44 @@ export class ReservationService {
     tables?: TableAssignment[];
   }> {
     const diningMinutes = 120;
-    const slotEnd = new Date(
-      request.slotStartUtc.getTime() + diningMinutes * 60 * 1000
-    );
 
     try {
       return await prisma.$transaction(
         async (tx) => {
           // Find available tables
-          const availableTables = await this.findAvailableTables(
-            request.partySize,
-            request.slotStartUtc,
-            diningMinutes
+          // Find available tables within the transaction
+          const slotEnd = new Date(
+            request.slotStart.getTime() + diningMinutes * 60 * 1000
           );
 
-          if (availableTables.length === 0) {
+          const availableTables = await tx.diningTable.findMany({
+            where: {
+              NOT: {
+                reserved: {
+                  some: {
+                    AND: [
+                      { startUtc: { lt: slotEnd } },
+                      { endUtc: { gt: request.slotStart } },
+                    ],
+                  },
+                },
+              },
+            },
+            orderBy: [{ seats: "asc" }, { tableNumber: "asc" }],
+          });
+
+          // Apply table selection logic - calculate how many tables we need
+          const tablesNeeded = Math.ceil(request.partySize / 2);
+          
+          if (availableTables.length < tablesNeeded) {
             return {
               success: false,
-              message: "No tables available for the requested time slot",
+              message: "Not enough tables available for the requested party size",
             };
           }
+
+          // Select the required number of tables
+          const selectedTables = availableTables.slice(0, tablesNeeded);
 
           // Create or get customer
           let customerId = request.customerId;
@@ -272,7 +145,7 @@ export class ReservationService {
           const reservation = await tx.reservation.create({
             data: {
               partySize: request.partySize,
-              slotStartUtc: request.slotStartUtc,
+              slotStartUtc: request.slotStart,
               slotEndUtc: slotEnd,
               customerId: customerId,
               status: "CONFIRMED",
@@ -281,12 +154,12 @@ export class ReservationService {
 
           // Create reserved table entries with time overlap protection
           await Promise.all(
-            availableTables.map((table) =>
+            selectedTables.map((table) =>
               tx.reservedTable.create({
                 data: {
                   reservationId: reservation.id,
-                  tableId: table.tableId,
-                  startUtc: request.slotStartUtc,
+                  tableId: table.id,
+                  startUtc: request.slotStart,
                   endUtc: slotEnd,
                 },
               })
@@ -297,7 +170,11 @@ export class ReservationService {
             success: true,
             reservationId: reservation.id,
             message: `Reservation confirmed for ${request.partySize} guests`,
-            tables: availableTables,
+            tables: selectedTables.map((table) => ({
+              tableId: table.id,
+              seats: table.seats,
+              tableNumber: table.tableNumber,
+            })),
           };
         },
         {

@@ -16,8 +16,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Create local datetime from date and time (no UTC conversion)
-    const [hours, minutes] = time.split(":").map(Number);
+    // Create local datetime from date and time (no UTC conversion)
+    const timeParts = time.split(":");
+    if (timeParts.length !== 2) {
+      return NextResponse.json(
+        { success: false, message: "Invalid time format. Use HH:MM" },
+        { status: 400 }
+      );
+    }
+
+    const hours = parseInt(timeParts[0], 10);
+    const minutes = parseInt(timeParts[1], 10);
+
+    if (
+      isNaN(hours) ||
+      isNaN(minutes) ||
+      hours < 0 ||
+      hours > 23 ||
+      minutes < 0 ||
+      minutes > 59
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Invalid time values" },
+        { status: 400 }
+      );
+    }
+
     const slotStartLocal = new Date(date);
+    if (isNaN(slotStartLocal.getTime())) {
+      return NextResponse.json(
+        { success: false, message: "Invalid date format" },
+        { status: 400 }
+      );
+    }
+
     slotStartLocal.setHours(hours, minutes, 0, 0);
 
     // Validate party size
@@ -42,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Create the reservation
     const result = await ReservationService.createReservation({
       partySize,
-      slotStartUtc: slotStartLocal,
+      slotStart: slotStartLocal,
       customerData: {
         firstName: customerData.firstName,
         lastName: customerData.lastName,

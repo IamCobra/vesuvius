@@ -94,8 +94,8 @@ export default async function Menu() {
                                     className="px-2 py-1 text-xs bg-burgundy-light text-burgundy-primary rounded"
                                   >
                                     {variant.name}{" "}
-                                    {variant.priceChange > 0 &&
-                                      `(+${variant.priceChange} kr)`}
+                                    {variant.priceChange.gt(0) &&
+                                      `(+${variant.priceChange.toString()} kr)`}
                                   </span>
                                 ))}
                               </div>
@@ -104,7 +104,7 @@ export default async function Menu() {
 
                           <div className="mt-4">
                             <span className="text-2xl font-bold text-burgundy-primary">
-                              {item.price} kr
+                              {item.price.toString()} kr
                             </span>
                           </div>
                         </div>
@@ -119,10 +119,10 @@ export default async function Menu() {
           {/* CTA Section */}
           <div className="text-center mt-16 p-8 bg-burgundy-primary rounded-lg">
             <h3 className="text-2xl font-bold text-white mb-4">
-              
+              Klar til en uforglemmelig aften?
             </h3>
             <p className="text-burgundy-light mb-6">
-              Reservere mens der stadig er tider!
+              Reserver mens der stadig er tider!
             </p>
             <Link
               href="/reservation"

@@ -309,94 +309,49 @@ async function main() {
 
   console.log("Menu items created:", menuItems.length);
 
-  // Create time slots (based on your ReservationTimes, converted to dinner service)
-  const timeSlots = await Promise.all([
-    prisma.timeSlot.create({
-      data: { startTime: "17:00", endTime: "19:00", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "17:15", endTime: "19:15", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "17:30", endTime: "19:30", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "17:45", endTime: "19:45", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "18:00", endTime: "20:00", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "18:15", endTime: "20:15", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "18:30", endTime: "20:30", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "18:45", endTime: "20:45", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "19:00", endTime: "21:00", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "19:15", endTime: "21:15", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "19:30", endTime: "21:30", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "19:45", endTime: "21:45", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "20:00", endTime: "22:00", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "20:15", endTime: "22:15", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "20:30", endTime: "22:30", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "20:45", endTime: "22:45", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "21:00", endTime: "23:00", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "21:15", endTime: "23:15", maxTables: 10 },
-    }),
-    prisma.timeSlot.create({
-      data: { startTime: "21:30", endTime: "23:30", maxTables: 10 },
-    }),
-  ]);
+  // Create time slots for all-day service (11:00 - 21:30, every 15 minutes)
+  const timeSlots = [];
+  const startHour = 11;
+  const endHour = 21;
+  const endMinutes = 30;
+
+  for (let hour = startHour; hour <= endHour; hour++) {
+    const maxMinutes = hour === endHour ? endMinutes : 45;
+    for (let minute = 0; minute <= maxMinutes; minute += 15) {
+      const startTime = `${String(hour).padStart(2, "0")}:${String(
+        minute
+      ).padStart(2, "0")}`;
+      const endHour = hour + 2; // 2-hour dining window
+      const endTime = `${String(endHour).padStart(2, "0")}:${String(
+        minute
+      ).padStart(2, "0")}`;
+
+      const slot = await prisma.timeSlot.create({
+        data: { startTime, endTime, maxTables: 10 },
+      });
+      timeSlots.push(slot);
+    }
+  }
 
   console.log("Time slots created:", timeSlots.length);
 
-  // Create dining tables - mainly 2-tops that can be combined for larger parties
+  // Create dining tables - 25 x 2-person tables that can be combined
   const diningTables = [];
 
-  // Table size distribution optimized for 2-person tables:
-  // 16 x 2-tops (tables 1-16) - Primary seating, can be combined
-  // 2 x 4-tops (tables 17-18) - For families who prefer single table
-  // 1 x 6-top (table 19) - Large single table option
-  // 1 x 8-top (table 20) - Very large parties or special events
+  // Table configuration for flexible seating:
+  // 25 x 2-tops (tables 1-25) - All tables are 2-person, combine as needed
+  // This gives us 50 total seats with maximum flexibility
+  // - 1-2 people: Use 1 table
+  // - 3-4 people: Combine 2 tables
+  // - 5-6 people: Combine 3 tables
+  // - 7-8 people: Combine 4 tables
+  // - 9+ people: Combine 5+ tables (up to restaurant policy limit)
 
-  for (let i = 1; i <= 20; i++) {
-    let seats: number;
-    if (i <= 16) {
-      seats = 2; // 2-tops (main seating)
-    } else if (i <= 18) {
-      seats = 4; // 4-tops
-    } else if (i <= 19) {
-      seats = 6; // 6-top
-    } else {
-      seats = 8; // 8-top
-    }
-
+  for (let i = 1; i <= 25; i++) {
     const table = await prisma.diningTable.create({
       data: {
         tableNumber: i,
-        seats: seats,
+        seats: 2, // All tables are 2-person
       },
     });
     diningTables.push(table);
@@ -499,9 +454,17 @@ async function main() {
   // Helper function to create UTC datetime from date and time
   function createUtcDateTime(date: Date, timeString: string): Date {
     const [hours, minutes] = timeString.split(":").map(Number);
-    const utcDate = new Date(date);
-    utcDate.setUTCHours(hours - 1, minutes, 0, 0); // Adjust for CET (UTC+1)
-    return utcDate;
+    // Create a date string in ISO format with the local time
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hoursStr = String(hours).padStart(2, "0");
+    const minutesStr = String(minutes).padStart(2, "0");
+
+    // Parse as Europe/Copenhagen time and convert to UTC
+    const localDateString = `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
+    // This assumes the server is configured with the correct timezone
+    return new Date(localDateString);
   }
 
   const reservations = await Promise.all([
@@ -558,7 +521,7 @@ async function main() {
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[1].id,
-        tableId: diningTables[7].id, // 4-top for party of 4
+        tableId: diningTables[16].id, // Table 17: 4-top for party of 4
         startUtc: reservations[1].slotStartUtc,
         endUtc: reservations[1].slotEndUtc,
       },
@@ -566,7 +529,7 @@ async function main() {
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[2].id,
-        tableId: diningTables[8].id, // 4-top for party of 3
+        tableId: diningTables[17].id, // Table 18: 4-top for party of 3
         startUtc: reservations[2].slotStartUtc,
         endUtc: reservations[2].slotEndUtc,
       },
@@ -574,7 +537,7 @@ async function main() {
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[3].id,
-        tableId: diningTables[15].id, // 6-top for party of 6
+        tableId: diningTables[18].id, // Table 19: 6-top for party of 6
         startUtc: reservations[3].slotStartUtc,
         endUtc: reservations[3].slotEndUtc,
       },

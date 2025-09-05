@@ -28,9 +28,33 @@ export default function Reservation() {
     phone: "",
   });
 
-  // Available time slots for dinner service - memoized to prevent useEffect dependency issues
+  // Available time slots for all-day service - memoized to prevent useEffect dependency issues
   const availableTimeSlots = useMemo(
     () => [
+      "11:00",
+      "11:15",
+      "11:30",
+      "11:45",
+      "12:00",
+      "12:15",
+      "12:30",
+      "12:45",
+      "13:00",
+      "13:15",
+      "13:30",
+      "13:45",
+      "14:00",
+      "14:15",
+      "14:30",
+      "14:45",
+      "15:00",
+      "15:15",
+      "15:30",
+      "15:45",
+      "16:00",
+      "16:15",
+      "16:30",
+      "16:45",
       "17:00",
       "17:15",
       "17:30",
@@ -199,6 +223,8 @@ export default function Reservation() {
 
   // Load availability for all time slots when date or guests change
   useEffect(() => {
+    const abortController = new AbortController();
+
     const loadAvailabilityForDate = async () => {
       if (!reservationData.date) {
         console.log("🔍 No date selected, skipping availability check");
@@ -223,10 +249,15 @@ export default function Reservation() {
       const checks = validTimeSlots.map(async (time) => {
         const key = `${reservationData.date}:${time}`;
         try {
-          const url = `/api/reservations?date=${reservationData.date}&time=${time}&partySize=${reservationData.guests}`;
+          const params = new URLSearchParams({
+            date: reservationData.date,
+            time: time,
+            partySize: reservationData.guests.toString(),
+          });
+          const url = `/api/reservations?${params.toString()}`;
           console.log(`📞 API call: ${url}`);
 
-          const response = await fetch(url);
+          const response = await fetch(url, { signal: abortController.signal });
           const data = await response.json();
 
           console.log(`📊 Response for ${time}:`, data);
@@ -236,12 +267,16 @@ export default function Reservation() {
             available: data.success && data.available,
           };
         } catch (error) {
+          if (error.name === "AbortError") {
+            console.log(`🔄 Request cancelled for ${time}`);
+            return null;
+          }
           console.error(`❌ Error checking availability for ${time}:`, error);
           return { key, available: false };
         }
       });
 
-      const results = await Promise.all(checks);
+      const results = (await Promise.all(checks)).filter(Boolean);
 
       // Update availability data
       const newAvailabilityData: { [key: string]: boolean } = {};
@@ -260,6 +295,10 @@ export default function Reservation() {
     };
 
     loadAvailabilityForDate();
+
+    return () => {
+      abortController.abort();
+    };
   }, [reservationData.date, reservationData.guests, availableTimeSlots]);
 
   // Handle guest count change with availability cache clearing
@@ -387,7 +426,7 @@ export default function Reservation() {
 
             {/* Additional info */}
             <div className="text-sm opacity-75 mt-8">
-              <p>Åbent alle dage • 17:00 - 22:00</p>
+              <p>Åbent alle dage • 11:00 - 22:00</p>
             </div>
           </div>
         </div>
@@ -789,16 +828,14 @@ export default function Reservation() {
                             </span>
                           </div>
 
-                          {reservationData.phone && (
-                            <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
-                              <span className="font-medium text-gray-700">
-                                Telefon:
-                              </span>
-                              <span className="text-burgundy-primary">
-                                {reservationData.phone}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                            <span className="font-medium text-gray-700">
+                              Telefon:
+                            </span>
+                            <span className="text-burgundy-primary">
+                              {reservationData.phone}
+                            </span>
+                          </div>
 
                           <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
                             <span className="font-medium text-gray-700">

@@ -19,9 +19,9 @@ model Category {
 
 model MenuItem {
   id          String   @id @default(cuid())
-  name        String   @unique
+  name        String
   description String
-  price       Float
+  price       Decimal  @db.Decimal(10, 2)
   image       String?
   available   Boolean  @default(true)
   
@@ -34,13 +34,14 @@ model MenuItem {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@unique([categoryId, name])
   @@map("menu_items")
 }
 
 model MenuItemVariant {
   id          String   @id @default(cuid())
   name        String   // "Dobbelt", "Vegetarbøf", etc.
-  priceChange Float    // +26 for dobbelt, +0 for vegetar
+  priceChange Decimal  @db.Decimal(10, 2) // +26 for dobbelt, +0 for vegetar
   
   menuItemId  String
   menuItem    MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
@@ -141,7 +142,7 @@ model Order {
   customer      Customer?   @relation(fields: [customerId], references: [id])
   tableNumber   Int?        // For walk-in customers
   status        OrderStatus @default(ORDERED)
-  totalPrice    Float       @default(0)
+  totalPrice    Decimal     @default(0) @db.Decimal(10, 2)
   notes         String?     // Special requests
   
   items         OrderItem[]
@@ -156,7 +157,7 @@ model Order {
 model OrderItem {
   id         String   @id @default(cuid())
   quantity   Int
-  unitPrice  Float
+  unitPrice  Decimal  @db.Decimal(10, 2)
   
   orderId    String
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -187,13 +188,14 @@ model OpeningHour {
 
 model Blackout {
   id        String   @id @default(cuid())
-  startUtc  DateTime
-  endUtc    DateTime
+  startUtc  DateTime @db.Timestamptz
+  endUtc    DateTime @db.Timestamptz
   reason    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([startUtc, endUtc])
+  @@map("blackouts")
 }
 
 model SlotSetting {
