@@ -28,10 +28,10 @@ export default function HeroSection({
               View Menu
             </Link>
             <Link
-              href="/order"
+              href="/reservation"
               className="inline-block bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold border-2 border-orange-600 hover:bg-orange-50 transition-colors"
             >
-              Order Now
+              Make Reservation
             </Link>
           </div>
         )}

@@ -1,35 +1,62 @@
 // Shared types for the restaurant application
 
 export interface MenuItem {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
-  image: string;
-  category?: string;
+  image?: string;
+  categoryId: string;
+  available: boolean;
+  variants?: MenuItemVariant[];
+}
+
+export interface MenuItemVariant {
+  id: string;
+  name: string;
+  priceChange: number;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  menuItems: MenuItem[];
 }
 
 export interface CartItem extends MenuItem {
   quantity: number;
 }
 
-export interface CustomerInfo {
-  name: string;
+export interface Customer {
+  id?: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
-  address: string;
+}
+
+export interface TableAssignment {
+  tableId: string;
+  seats: number;
+  tableNumber: number;
+}
+
+export interface Reservation {
+  id?: string;
+  partySize: number;
+  slotStartUtc: Date;
+  slotEndUtc: Date;
+  customerId: string;
+  customer?: Customer;
+  status: "CONFIRMED" | "CANCELLED" | "COMPLETED";
+  tables: TableAssignment[];
 }
 
 export interface Feature {
   title: string;
   description: string;
-  icon: React.ReactNode;
-}
-
-export interface SocialIcon {
-  name: string;
-  href: string;
-  icon: React.ReactNode;
+  icon: string;
 }
 
 export interface OpeningHour {
@@ -42,4 +69,13 @@ export interface QuickLink {
   href: string;
 }
 
-export type PageType = "home" | "menu" | "order";
+export interface ContactInfo {
+  phone: string;
+  email: string;
+  address: {
+    street: string;
+    city: string;
+  };
+}
+
+export type PageType = "home" | "menu" | "reservation" | "contact" | "admin";

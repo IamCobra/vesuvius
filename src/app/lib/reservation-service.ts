@@ -54,7 +54,7 @@ export class ReservationService {
 
     // Calculate how many tables we need (round up for odd numbers)
     const tablesNeeded = Math.ceil(partySize / 2);
-    
+
     // Check if we have enough available tables
     if (availableTables.length >= tablesNeeded) {
       return availableTables.slice(0, tablesNeeded).map((table) => ({
@@ -105,11 +105,12 @@ export class ReservationService {
 
           // Apply table selection logic - calculate how many tables we need
           const tablesNeeded = Math.ceil(request.partySize / 2);
-          
+
           if (availableTables.length < tablesNeeded) {
             return {
               success: false,
-              message: "Not enough tables available for the requested party size",
+              message:
+                "Not enough tables available for the requested party size",
             };
           }
 
