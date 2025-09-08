@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Footer from "@/app/components/footer";
 import { useState, useEffect, useMemo } from "react";
+import { TIME_SLOTS, LATE_TIME_SLOTS } from "@/app/constants/restaurant";
 
 export default function Reservation() {
   const [showModal, setShowModal] = useState(false);
@@ -28,55 +29,8 @@ export default function Reservation() {
     phone: "",
   });
 
-  // Available time slots for all-day service - memoized to prevent useEffect dependency issues
-  const availableTimeSlots = useMemo(
-    () => [
-      "11:00",
-      "11:15",
-      "11:30",
-      "11:45",
-      "12:00",
-      "12:15",
-      "12:30",
-      "12:45",
-      "13:00",
-      "13:15",
-      "13:30",
-      "13:45",
-      "14:00",
-      "14:15",
-      "14:30",
-      "14:45",
-      "15:00",
-      "15:15",
-      "15:30",
-      "15:45",
-      "16:00",
-      "16:15",
-      "16:30",
-      "16:45",
-      "17:00",
-      "17:15",
-      "17:30",
-      "17:45",
-      "18:00",
-      "18:15",
-      "18:30",
-      "18:45",
-      "19:00",
-      "19:15",
-      "19:30",
-      "19:45",
-      "20:00",
-      "20:15",
-      "20:30",
-      "20:45",
-      "21:00",
-      "21:15",
-      "21:30",
-    ],
-    []
-  );
+  // Available time slots for all-day service - imported from constants
+  const availableTimeSlots = useMemo(() => TIME_SLOTS, []);
 
   // Get minimum date (today)
   const getMinDate = () => {
@@ -128,26 +82,6 @@ export default function Reservation() {
   const handleReservationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError("");
-
-    // Final validation before submission
-    if (!isValidDate(reservationData.date)) {
-      setSubmitError("Ugyldig dato valgt. Vælg venligst en dato i fremtiden.");
-      return;
-    }
-
-    if (!isValidTime(reservationData.time, reservationData.date)) {
-      setSubmitError("Ugyldig tid valgt. Tidspunktet er allerede passeret.");
-      return;
-    }
-
-    // Check if time is still available (double-check)
-    if (!isTimeSlotAvailable(reservationData.time)) {
-      setSubmitError(
-        "Dette tidspunkt er desværre ikke længere ledigt. Vælg venligst et andet tidspunkt."
-      );
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -187,8 +121,7 @@ export default function Reservation() {
             "Der opstod en fejl ved oprettelse af reservationen."
         );
       }
-    } catch (error) {
-      console.error("Reservation error:", error);
+    } catch {
       setSubmitError(
         "Der opstod en fejl ved oprettelse af reservationen. Prøv venligst igen."
       );
@@ -227,22 +160,13 @@ export default function Reservation() {
 
     const loadAvailabilityForDate = async () => {
       if (!reservationData.date) {
-        console.log("🔍 No date selected, skipping availability check");
         return;
       }
 
-      console.log(
-        `🔍 Loading availability for ${reservationData.date} with ${reservationData.guests} guests`
-      );
       setIsCheckingAvailability(true);
 
       const validTimeSlots = availableTimeSlots.filter((time) =>
         isValidTime(time, reservationData.date)
-      );
-
-      console.log(
-        `🔍 Checking ${validTimeSlots.length} valid time slots:`,
-        validTimeSlots
       );
 
       // Check availability for all valid time slots
@@ -254,13 +178,10 @@ export default function Reservation() {
             time: time,
             partySize: reservationData.guests.toString(),
           });
-          const url = `/api/reservations?${params.toString()}`;
-          console.log(`📞 API call: ${url}`);
-
-          const response = await fetch(url, { signal: abortController.signal });
+          const response = await fetch(`/api/reservations?${params.toString()}`, { 
+            signal: abortController.signal 
+          });
           const data = await response.json();
-
-          console.log(`📊 Response for ${time}:`, data);
 
           return {
             key,
@@ -268,10 +189,8 @@ export default function Reservation() {
           };
         } catch (error) {
           if (error.name === "AbortError") {
-            console.log(`🔄 Request cancelled for ${time}`);
             return null;
           }
-          console.error(`❌ Error checking availability for ${time}:`, error);
           return { key, available: false };
         }
       });
@@ -283,8 +202,6 @@ export default function Reservation() {
       results.forEach(({ key, available }) => {
         newAvailabilityData[key] = available;
       });
-
-      console.log("📊 Final availability data:", newAvailabilityData);
 
       setAvailabilityData((prev) => ({
         ...prev,
@@ -561,6 +478,7 @@ export default function Reservation() {
                             .map((time) => {
                               const isAvailable = isTimeSlotAvailable(time);
                               const isSelected = reservationData.time === time;
+                              const isLateTime = LATE_TIME_SLOTS.includes(time);
 
                               return (
                                 <button
@@ -575,17 +493,24 @@ export default function Reservation() {
                                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                                     isSelected && isAvailable
                                       ? "bg-burgundy-primary text-white shadow-md ring-2 ring-burgundy-primary ring-offset-2"
+                                      : isAvailable && isLateTime
+                                      ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border border-yellow-300 cursor-pointer"
                                       : isAvailable
                                       ? "bg-gray-100 text-gray-700 hover:bg-burgundy-light hover:text-burgundy-dark border border-gray-200 cursor-pointer"
                                       : "bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed"
                                   }`}
                                   title={
-                                    isAvailable
+                                    isAvailable && isLateTime
+                                      ? `Ledig tid: ${time} (Restauranten lukker kl. 22:00)`
+                                      : isAvailable
                                       ? `Ledig tid: ${time}`
                                       : `Optaget: ${time}`
                                   }
                                 >
                                   {time}
+                                  {isLateTime && isAvailable && (
+                                    <span className="ml-1 text-xs text-yellow-600">⚠</span>
+                                  )}
                                   {!isAvailable && (
                                     <span className="ml-1 text-xs">×</span>
                                   )}
@@ -597,6 +522,13 @@ export default function Reservation() {
                         {isCheckingAvailability && (
                           <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-200">
                             🔍 Tjekker ledige tider...
+                          </div>
+                        )}
+
+                        {/* Late time warning */}
+                        {getAvailableTimeSlotsForDate().some(time => LATE_TIME_SLOTS.includes(time)) && (
+                          <div className="mt-2 text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                            ⚠️ <strong>OBS:</strong> Tider efter 20:15 er tæt på lukketid (22:00). Restauranten lukker kl. 22:00.
                           </div>
                         )}
 
@@ -615,8 +547,17 @@ export default function Reservation() {
                     )}
 
                     {reservationData.time && (
-                      <div className="mt-2 text-sm text-green-600 bg-green-50 p-2 rounded-lg border border-green-200">
+                      <div className={`mt-2 text-sm p-2 rounded-lg border ${
+                        LATE_TIME_SLOTS.includes(reservationData.time)
+                          ? "text-yellow-700 bg-yellow-50 border-yellow-200"
+                          : "text-green-600 bg-green-50 border-green-200"
+                      }`}>
                         ✓ Valgt tid: {reservationData.time}
+                        {LATE_TIME_SLOTS.includes(reservationData.time) && (
+                          <span className="block mt-1 text-xs">
+                            ⚠️ Bemærk: Restauranten lukker kl. 22:00
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>

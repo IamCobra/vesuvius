@@ -195,7 +195,7 @@ export default function AdminDashboard() {
     fetchOrdersSummary();
 
     const interval = setInterval(() => {
-      // poll key metrics every 8s (kitchen speed requirement)
+      // Poll key metrics every 8 seconds
       fetchOrdersSummary();
     }, 8000);
 
@@ -356,14 +356,6 @@ export default function AdminDashboard() {
                   <strong>{ordersSummary.complications}</strong>
                 </li>
               </ul>
-              <div className="mt-4">
-                <Link
-                  href="/kitchen"
-                  className="block text-center px-3 py-2 bg-orange-600 text-white rounded"
-                >
-                  Gå til køkkenskærm
-                </Link>
-              </div>
             </div>
           </section>
 

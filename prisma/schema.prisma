@@ -52,7 +52,7 @@ model MenuItemVariant {
   @@map("menu_item_variants")
 }
 
-// Enhanced Customer Management (from your SQL)
+// Enhanced Customer Management
 model Customer {
   id           String        @id @default(cuid())
   firstName    String

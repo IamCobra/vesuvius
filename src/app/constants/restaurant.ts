@@ -18,12 +18,12 @@ export const RESTAURANT_INFO = {
 
 export const OPENING_HOURS = [
   { day: "Mandag", hours: "LUKKET" },
-  { day: "Tirsdag", hours: "11:00 - 21:30" },
-  { day: "Onsdag", hours: "11:00 - 21:30" },
-  { day: "Torsdag", hours: "11:00 - 21:30" },
-  { day: "Fredag", hours: "11:00 - 21:30" },
-  { day: "Lørdag", hours: "11:00 - 21:30" },
-  { day: "Søndag", hours: "11:00 - 21:30" },
+  { day: "Tirsdag", hours: "11:00 - 22:00" },
+  { day: "Onsdag", hours: "11:00 - 22:00" },
+  { day: "Torsdag", hours: "11:00 - 22:00" },
+  { day: "Fredag", hours: "11:00 - 22:00" },
+  { day: "Lørdag", hours: "11:00 - 22:00" },
+  { day: "Søndag", hours: "11:00 - 22:00" },
 ];
 
 export const QUICK_LINKS = [
@@ -75,9 +75,10 @@ export const TIME_SLOTS = [
   "20:30",
   "20:45",
   "21:00",
-  "21:15",
-  "21:30",
 ];
+
+// Time slots that are close to closing (show warning)
+export const LATE_TIME_SLOTS = ["20:30", "20:45", "21:00"];
 
 export const CONTACT_DETAILS = [
   {
@@ -97,7 +98,7 @@ export const CONTACT_DETAILS = [
   },
   {
     title: "Åbningstider",
-    content: ["Man: Lukket", "Tir-Lør: 11:00-21:30", "Søn: 11:00-21:30"],
+    content: ["Man: Lukket", "Tir-Lør: 11:00-22:00", "Søn: 11:00-22:00"],
     icon: "clock",
   },
 ];

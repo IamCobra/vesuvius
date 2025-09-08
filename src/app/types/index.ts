@@ -24,10 +24,6 @@ export interface Category {
   menuItems: MenuItem[];
 }
 
-export interface CartItem extends MenuItem {
-  quantity: number;
-}
-
 export interface Customer {
   id?: string;
   firstName: string;

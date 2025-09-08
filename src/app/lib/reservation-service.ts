@@ -183,8 +183,6 @@ export class ReservationService {
         }
       );
     } catch (error: unknown) {
-      console.error("Reservation creation failed:", error);
-
       // Handle PostgreSQL exclusion constraint violation
       if (
         error &&
