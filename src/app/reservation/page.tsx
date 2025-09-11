@@ -178,9 +178,12 @@ export default function Reservation() {
             time: time,
             partySize: reservationData.guests.toString(),
           });
-          const response = await fetch(`/api/reservations?${params.toString()}`, { 
-            signal: abortController.signal 
-          });
+          const response = await fetch(
+            `/api/reservations?${params.toString()}`,
+            {
+              signal: abortController.signal,
+            }
+          );
           const data = await response.json();
 
           return {
@@ -509,7 +512,9 @@ export default function Reservation() {
                                 >
                                   {time}
                                   {isLateTime && isAvailable && (
-                                    <span className="ml-1 text-xs text-yellow-600">⚠</span>
+                                    <span className="ml-1 text-xs text-yellow-600">
+                                      ⚠
+                                    </span>
                                   )}
                                   {!isAvailable && (
                                     <span className="ml-1 text-xs">×</span>
@@ -526,9 +531,12 @@ export default function Reservation() {
                         )}
 
                         {/* Late time warning */}
-                        {getAvailableTimeSlotsForDate().some(time => LATE_TIME_SLOTS.includes(time)) && (
+                        {getAvailableTimeSlotsForDate().some((time) =>
+                          LATE_TIME_SLOTS.includes(time)
+                        ) && (
                           <div className="mt-2 text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                            ⚠️ <strong>OBS:</strong> Tider efter 20:15 er tæt på lukketid (22:00). Restauranten lukker kl. 22:00.
+                            ⚠️ <strong>OBS:</strong> Tider efter 20:15 er tæt på
+                            lukketid (22:00). Restauranten lukker kl. 22:00.
                           </div>
                         )}
 
@@ -547,11 +555,13 @@ export default function Reservation() {
                     )}
 
                     {reservationData.time && (
-                      <div className={`mt-2 text-sm p-2 rounded-lg border ${
-                        LATE_TIME_SLOTS.includes(reservationData.time)
-                          ? "text-yellow-700 bg-yellow-50 border-yellow-200"
-                          : "text-green-600 bg-green-50 border-green-200"
-                      }`}>
+                      <div
+                        className={`mt-2 text-sm p-2 rounded-lg border ${
+                          LATE_TIME_SLOTS.includes(reservationData.time)
+                            ? "text-yellow-700 bg-yellow-50 border-yellow-200"
+                            : "text-green-600 bg-green-50 border-green-200"
+                        }`}
+                      >
                         ✓ Valgt tid: {reservationData.time}
                         {LATE_TIME_SLOTS.includes(reservationData.time) && (
                           <span className="block mt-1 text-xs">

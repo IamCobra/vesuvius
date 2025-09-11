@@ -20,6 +20,12 @@ export default function Navigation() {
     { href: "/menu", label: "Menu" },
     { href: "/reservation", label: "Reservation" },
     { href: "/contact", label: "Kontakt" },
+    {
+      href: "/admin/dashboard",
+      label: "Admin",
+      className:
+        "border border-burgundy-primary px-3 py-1 rounded-md hover:bg-burgundy-primary hover:text-white",
+    },
   ];
 
   return (
@@ -36,12 +42,12 @@ export default function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex space-x-8 items-center">
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={getLinkClass(item.href)}
+                className={item.className || getLinkClass(item.href)}
               >
                 {item.label}
               </Link>
@@ -84,9 +90,11 @@ export default function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block py-3 px-3 rounded-md ${getLinkClass(
-                    item.href
-                  )}`}
+                  className={`block py-3 px-3 rounded-md ${
+                    item.className
+                      ? "border border-burgundy-primary text-center hover:bg-burgundy-primary hover:text-white"
+                      : getLinkClass(item.href)
+                  }`}
                   onClick={() => setIsMenuOpen(false)} // Close menu on click
                 >
                   {item.label}

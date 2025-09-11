@@ -1,0 +1,20 @@
+# Kunde Web App - Kører på offentlig tilgængelig enhed
+version: "3.8"
+
+services:
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: vesuvius-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # SKIFT 192.168.1.100 til jeres database server IP
+      - DATABASE_URL=postgresql://vesuvius_user:vesuvius_secure_2024@192.168.1.100:5432/vesuvius
+      - REDIS_URL=redis://192.168.1.100:6379
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=web-secret-key-2024
+# Ingen database service - den kører på serveren!

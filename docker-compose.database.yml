@@ -1,0 +1,78 @@
+# Database Server Only - Kører på stationær PC
+version: "3.8"
+
+services:
+  # Central PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: vesuvius-central-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vesuvius
+      POSTGRES_USER: vesuvius_user
+      POSTGRES_PASSWORD: vesuvius_secure_2024
+    ports:
+      - "5432:5432" # Eksponeret til netværk
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backups:/backups
+    networks:
+      - vesuvius-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: vesuvius-cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - vesuvius-network
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: vesuvius-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@vesuvius.dk
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - vesuvius-network
+
+  # Automatic backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: vesuvius-backup
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: vesuvius_secure_2024
+    volumes:
+      - ./backups:/backups
+    command: >
+      sh -c "
+        while true; do
+          sleep 3600
+          pg_dump -h postgres -U vesuvius_user vesuvius > /backups/backup_$(date +%Y%m%d_%H%M%S).sql
+          find /backups -name 'backup_*.sql' -mtime +7 -delete
+        done
+      "
+    depends_on:
+      - postgres
+    networks:
+      - vesuvius-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  vesuvius-network:
+    driver: bridge

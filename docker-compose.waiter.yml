@@ -1,0 +1,21 @@
+# Tjener App - Kører på tablet/PC ved bordene
+version: "3.8"
+
+services:
+  waiter-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.waiter
+    container_name: vesuvius-waiter
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      # SKIFT 192.168.1.100 til jeres database server IP
+      - DATABASE_URL=postgresql://vesuvius_user:vesuvius_secure_2024@192.168.1.100:5432/vesuvius
+      - REDIS_URL=redis://192.168.1.100:6379
+      - NEXTAUTH_URL=http://localhost:3002
+      - NEXTAUTH_SECRET=waiter-secret-key-2024
+      - APP_ROLE=waiter
+# Ingen database service - den kører på serveren!

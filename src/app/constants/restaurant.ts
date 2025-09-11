@@ -14,6 +14,10 @@ export const RESTAURANT_INFO = {
     instagram: "#",
     twitter: "#",
   },
+  // Restaurant configuration
+  tablesCount: 25,
+  seatsPerTable: 2,
+  totalCapacity: 50,
 };
 
 export const OPENING_HOURS = [

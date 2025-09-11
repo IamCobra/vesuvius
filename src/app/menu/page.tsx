@@ -1,31 +1,69 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import Footer from "@/app/components/footer";
-import { prisma } from "@/app/lib/prisma";
+import { useState, useEffect } from "react";
 
-// Server Component - fetcher data direkte
-async function getMenuData() {
-  const categories = await prisma.category.findMany({
-    include: {
-      menuItems: {
-        include: {
-          variants: true,
-        },
-        where: {
-          available: true,
-        },
-      },
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  return categories;
+interface MenuVariant {
+  id: string;
+  name: string;
+  priceChange: number;
+  menuItemId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export default async function Menu() {
-  const categories = await getMenuData();
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string | null;
+  available: boolean;
+  variants: MenuVariant[];
+}
+
+interface Category {
+  id: string;
+  name: string;
+  menuItems: MenuItem[];
+}
+
+export default function Menu() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMenuData() {
+      try {
+        const response = await fetch("/api/menu");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Error fetching menu:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMenuData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="spinner-border text-burgundy-primary" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+          <p className="mt-4 text-gray-600">Indlæser menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Opret "All" kategori med alle menu items
   // const allMenuItems = categories.flatMap((cat) => cat.menuItems);
@@ -94,8 +132,8 @@ export default async function Menu() {
                                     className="px-2 py-1 text-xs bg-burgundy-light text-burgundy-primary rounded"
                                   >
                                     {variant.name}{" "}
-                                    {variant.priceChange.gt(0) &&
-                                      `(+${variant.priceChange.toString()} kr)`}
+                                    {variant.priceChange > 0 &&
+                                      `(+${variant.priceChange} kr)`}
                                   </span>
                                 ))}
                               </div>

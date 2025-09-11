@@ -1,0 +1,21 @@
+# Køkken App - Kører på PC i køkkenet
+version: "3.8"
+
+services:
+  kitchen-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.kitchen
+    container_name: vesuvius-kitchen
+    restart: unless-stopped
+    ports:
+      - "3003:3000"
+    environment:
+      - NODE_ENV=production
+      # SKIFT 192.168.1.100 til jeres database server IP
+      - DATABASE_URL=postgresql://vesuvius_user:vesuvius_secure_2024@192.168.1.100:5432/vesuvius
+      - REDIS_URL=redis://192.168.1.100:6379
+      - NEXTAUTH_URL=http://localhost:3003
+      - NEXTAUTH_SECRET=kitchen-secret-key-2024
+      - APP_ROLE=kitchen
+# Ingen database service - den kører på serveren!
