@@ -16,7 +16,7 @@ Et komplet restaurant management system bygget med Next.js, TypeScript og Postgr
 └─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
           │                      │                      │
           └──────────────────────┼──────────────────────┘
-                                 │                       
+                                 │
                    ┌─────────────▼─────────────────┐
                    │     Central Database         │
                    │   PostgreSQL (Port 5432)     │
@@ -26,17 +26,19 @@ Et komplet restaurant management system bygget med Next.js, TypeScript og Postgr
 ## 🚀 Quick Start
 
 ### Udvikling
+
 ```bash
 npm install
 npm run dev
 ```
 
 ### Produktion (Se DEPLOYMENT-GUIDE.md)
+
 ```bash
 # Database Server
 docker-compose -f docker-compose.database.yml up -d
 
-# Web App (på manager PC)  
+# Web App (på manager PC)
 docker-compose -f docker-compose.web.yml up -d
 
 # Waiter App (på tablet)
@@ -67,7 +69,7 @@ vesuvius/
 ## 🌐 Access URLs
 
 - **Web App (Hjemmeside + Admin):** http://localhost:3000
-- **Admin Panel:** http://localhost:3000/admin/dashboard  
+- **Admin Panel:** http://localhost:3000/admin/dashboard
 - **Waiter App (Separate Next.js App):** http://localhost:3002
 - **Kitchen App (Separate Next.js App):** http://localhost:3003
 
@@ -87,7 +89,7 @@ vesuvius/
 
 ```bash
 npm run dev        # Start development server
-npm run build      # Build for production  
+npm run build      # Build for production
 npm run start      # Start production server
 npm run lint       # Run linting
 ```
