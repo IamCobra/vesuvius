@@ -12,13 +12,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Generate Prisma client
 RUN npx prisma generate
 
-# Kopier source code - fokus på køkken funktionalitet
-COPY src/app/kitchen ./src/app/kitchen
-COPY src/app/components ./src/app/components
-COPY src/app/lib ./src/app/lib
-COPY src/app/constants ./src/app/constants
-COPY src/app/globals.css ./src/app/globals.css
-COPY src/app/layout.tsx ./src/app/layout.tsx
+# Kopier hele source code (kitchen app har brug for alt)
+COPY src ./src
+COPY public ./public
 
 # Kopier config filer
 COPY next.config.ts ./
@@ -50,13 +46,13 @@ COPY --from=builder /app/node_modules ./node_modules
 # Set korrekte tilladelser
 USER nextjs
 
-EXPOSE 3000
+EXPOSE 3003
 
-ENV PORT 3000
+ENV PORT 3003
 ENV HOSTNAME "0.0.0.0"
 
 # Health check for køkken app
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/kitchen/dashboard || exit 1
+  CMD curl -f http://localhost:3003/kitchen || exit 1
 
 CMD ["node", "server.js"]

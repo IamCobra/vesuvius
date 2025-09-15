@@ -6,12 +6,13 @@ Et komplet restaurant management system bygget med Next.js, TypeScript og Postgr
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Hjemmeside     │    │   Tjener App    │    │   Køkken App    │
+│  Web App        │    │   Waiter App    │    │   Kitchen App   │
 │  (Port 3000)    │    │   (Port 3002)   │    │   (Port 3003)   │
 │                 │    │                 │    │                 │
-│  • Reservations │    │  • Order Taking │    │  • Order Status │
-│  • Menu Display │    │  • Table Status │    │  • Menu Items   │
+│  • Hjemmeside   │    │  • Order Taking │    │  • Order Status │
+│  • Reservations │    │  • Table Status │    │  • Menu Items   │
 │  • Admin Panel  │    │  • Table Mgmt   │    │  • Kitchen Flow │
+│                 │    │  (Next.js App)  │    │  (Next.js App)  │
 └─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
           │                      │                      │
           └──────────────────────┼──────────────────────┘
@@ -65,10 +66,10 @@ vesuvius/
 
 ## 🌐 Access URLs
 
-- **Hjemmeside + Admin:** http://localhost:3000
+- **Web App (Hjemmeside + Admin):** http://localhost:3000
 - **Admin Panel:** http://localhost:3000/admin/dashboard  
-- **Waiter App:** http://localhost:3002
-- **Kitchen App:** http://localhost:3003
+- **Waiter App (Separate Next.js App):** http://localhost:3002
+- **Kitchen App (Separate Next.js App):** http://localhost:3003
 
 ## 📚 Dokumentation
 
