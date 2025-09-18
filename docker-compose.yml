@@ -1,73 +1,21 @@
-version: "3.9"
-
 services:
   postgres:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    env_file: ./.env
+    image: postgres:16
+    environment:
+      POSTGRES_USER: vesuvius
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: vesuvius
+      
     ports:
-      - "5432:5432"  # Eksponér database for eksterne apps
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U vesuvius -d vesuvius"]
       interval: 5s
       timeout: 3s
-      retries: 10
-    networks:
-      - vesuvius-network
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: ["redis-server", "--save", "900", "1", "--loglevel", "warning"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    # Cache er KUN intern
-    networks:
-      - vesuvius-network
-
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
-    restart: unless-stopped
-    env_file: ./.env
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - REDIS_URL=redis://redis:6379
-    ports:
-      - "3000:3000"  # API tilgængelig på port 3000
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - vesuvius-network
-
-
-
-  pgadmin:
-    image: dpage/pgadmin4:8
-    restart: unless-stopped
-    env_file: ./.env
-    ports:
-      - "8080:80"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - vesuvius-network
+      retries: 20
 
 volumes:
   postgres_data:
-  pgadmin_data:
-
-networks:
-  vesuvius-network:
-    driver: bridge
