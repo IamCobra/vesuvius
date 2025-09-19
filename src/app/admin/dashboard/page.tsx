@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                   value={query}
                   onChange={(e)=>setQuery(e.target.value)}
                   placeholder="Søg i menupunkter..."
-                  className="px-3 py-2 border rounded-2xl w-48 text-sm focus:ring-2 focus:ring-burgundy-primary focus:outline-none"
+                  className="px-3 py-2 border rounded-2xl w-48 text-sm focus:ring-2 focus:ring-burgundy-primary focus:outline-none text-gray-900 bg-white placeholder-gray-500"
                 />
                 <AddMenuItemButton onAdd={fetchMenu} />
               </div>
