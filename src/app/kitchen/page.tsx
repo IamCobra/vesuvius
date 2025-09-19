@@ -2,49 +2,81 @@
 
 import { useState, useEffect } from "react";
 import { RESTAURANT_INFO } from "@/app/constants/restaurant";
+interface KitchenOrderItem {
+  id: string;
+  quantity: number;
+  notes?: string;
+  menuItem?: {
+    name: string;
+    category: string;
+  };
+}
 
 interface KitchenOrder {
   id: string;
-  tableNumber: number;
-  items: KitchenOrderItem[];
-  status: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "SERVED";
-  priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
-  orderedAt: string;
-  estimatedTime?: number;
-}
-
-interface KitchenOrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  category: string;
-  notes?: string;
-  prepTime: number;
-  status: "PENDING" | "PREPARING" | "READY";
-}
-
-interface MenuItem {
-  id: string;
-  name: string;
-  category: string;
-  available: boolean;
-  prepTime: number;
-  ingredients?: string[];
+  status: string;
+  createdAt: string;
+  items?: KitchenOrderItem[];
 }
 
 export default function KitchenDashboard() {
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [isLoading, setIsLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
 
-  const categories = ["ALL", "FORRETTER", "HOVEDRETTER", "DESSERTER", "DRIKKEVARER"];
+  const fetchMenuItems = async () => {
+    try {
+      const res = await fetch("/api/menu/items");
+      const data = await res.json();
+      if (data.success) setMenuItems(data.items);
+    } catch (err) {
+      console.error("Fejl ved hentning af menu:", err);
+    }
+  };
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      await fetch(`/api/kitchen/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      fetchOrders();
+    } catch (err) {
+      console.error("Fejl ved opdatering af ordre:", err);
+    }
+  };
+
+  // Add this function to handle menu item availability toggle
+  const updateItemAvailability = async (itemId: string, available: boolean) => {
+    try {
+      await fetch(`/api/menu/items/${itemId}/availability`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ available }),
+      });
+      fetchMenuItems();
+    } catch (err) {
+      console.error("Fejl ved opdatering af menuitem:", err);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
-    fetchMenu();
-    const interval = setInterval(fetchOrders, 5000);
-    return () => clearInterval(interval);
+    setCurrentTime(new Date().toLocaleTimeString("da-DK"));
+    const orderInterval = setInterval(() => {
+      fetchOrders();
+    }, 5000);
+    const clockInterval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString("da-DK"));
+    }, 1000);
+    return () => {
+      clearInterval(orderInterval);
+      clearInterval(clockInterval);
+    };
   }, []);
 
   const fetchOrders = async () => {
@@ -59,165 +91,131 @@ export default function KitchenDashboard() {
     }
   };
 
-  const fetchMenu = async () => {
-    try {
-      const res = await fetch("/api/menu/items");
-      const data = await res.json();
-      if (data.success) setMenuItems(data.items);
-    } catch (err) {
-      console.error("Fejl ved hentning af menu:", err);
-    }
-  };
-
-  const updateOrderStatus = async (orderId: string, status: KitchenOrder["status"]) => {
-    try {
-      await fetch(`/api/kitchen/orders/${orderId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      fetchOrders();
-    } catch (err) {
-      console.error("Fejl ved opdatering af ordre:", err);
-    }
-  };
-
-  const updateItemAvailability = async (itemId: string, available: boolean) => {
-    try {
-      await fetch(`/api/menu/items/${itemId}/availability`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ available }),
-      });
-      fetchMenu();
-    } catch (err) {
-      console.error("Fejl ved opdatering af menuitem:", err);
-    }
-  };
-
-  const getPriorityColor = (priority: KitchenOrder["priority"]) => {
-    switch (priority) {
-      case "URGENT": return "bg-red-100 border-red-500 text-red-800";
-      case "HIGH": return "bg-orange-100 border-orange-500 text-orange-800";
-      case "NORMAL": return "bg-blue-100 border-blue-500 text-blue-800";
-      case "LOW": return "bg-gray-100 border-gray-500 text-gray-800";
-      default: return "bg-gray-100 border-gray-500 text-gray-800";
-    }
-  };
-
-  const getStatusColor = (status: KitchenOrder["status"]) => {
-    switch (status) {
-      case "PENDING": return "bg-yellow-500";
-      case "CONFIRMED": return "bg-blue-500";
-      case "PREPARING": return "bg-orange-500";
-      case "READY": return "bg-green-500";
-      default: return "bg-gray-500";
-    }
-  };
-
-  const timeSinceOrder = (orderedAt: string) => {
-    const diff = Math.floor((Date.now() - new Date(orderedAt).getTime()) / 60000);
+  const timeSinceOrder = (createdAt: string) => {
+    const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000);
     if (diff < 1) return "Lige nu";
     if (diff === 1) return "1 minut siden";
     return `${diff} minutter siden`;
   };
 
-  const filteredMenuItems = selectedCategory === "ALL" ? menuItems : menuItems.filter(i => i.category === selectedCategory);
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex flex-col items-center">
+        <span className="text-lg text-gray-900 font-medium">Indlæser køkken...</span>
+      </div>
+    </div>
+  );
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-gray-900">Indlæser køkken...</div>;
+  // Group orders by status
+  const statusColumns = [
+    { key: "PENDING", label: "Ventende" },
+    { key: "PREPARING", label: "I gang" },
+    { key: "READY", label: "Klar" },
+  ];
+  const activeOrders = orders.filter(o => o.status !== "SERVED");
 
   return (
-    <div className="min-h-screen bg-burgundy-light">
-      {/* Header */}
-      <header className="bg-burgundy-primary text-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">{RESTAURANT_INFO.name} - Køkken</h1>
-            <p className="text-gray-200">Ordre håndtering & menu administration</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="bg-burgundy-dark px-4 py-2 rounded-2xl">
-              {orders.filter(o => o.status === "PREPARING").length} i gang
-            </div>
-            <div className="bg-yellow-500 px-4 py-2 rounded-2xl">
-              {orders.filter(o => o.status === "PENDING").length} ventende
-            </div>
-            <div className="bg-gray-700 px-4 py-2 rounded-2xl">
-              {new Date().toLocaleTimeString("da-DK")}
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 font-sans">
+      <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-10">
+        <h1 className="text-3xl font-extrabold tracking-tight text-burgundy-primary drop-shadow text-center mb-2">{RESTAURANT_INFO.name} Køkken</h1>
+        <div className="flex justify-center mb-8">
+          <span className="bg-gray-900 text-white px-6 py-3 rounded-2xl text-xl font-mono tracking-wider shadow-lg">{currentTime}</span>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Orders Section */}
-        <section className="lg:col-span-2 space-y-4">
-          {orders.length === 0 ? (
-            <div className="bg-white p-6 rounded-2xl shadow text-center text-gray-500">Ingen aktive ordre</div>
-          ) : orders.sort((a,b) => {
-            const p = { URGENT:4,HIGH:3,NORMAL:2,LOW:1 };
-            return (p[b.priority]-p[a.priority]) || (new Date(a.orderedAt).getTime() - new Date(b.orderedAt).getTime());
-          }).map(order => (
-            <div key={order.id} className={`bg-white p-4 rounded-2xl shadow border-2 ${getPriorityColor(order.priority)}`}>
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-bold text-xl">Bord {order.tableNumber}</h3>
-                  <p className="text-sm">{timeSinceOrder(order.orderedAt)}</p>
-                  {order.estimatedTime && <p className="text-sm font-medium">Est. tid: {order.estimatedTime} min</p>}
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className={`w-4 h-4 rounded-full ${getStatusColor(order.status)}`}></div>
-                  <span className="text-xs mt-1 font-medium">{order.status}</span>
-                </div>
-              </div>
-              <div className="space-y-3 mb-4">
-                {order.items.map(item => (
-                  <div key={item.id} className="bg-burgundy-light rounded-lg p-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="font-semibold">{item.quantity}x {item.name}</span>
-                        <span className="text-sm text-gray-700 ml-2">({item.prepTime} min)</span>
-                      </div>
-                      <span className={`px-2 py-1 rounded text-xs ${item.status === "READY" ? "bg-green-200 text-green-800" : item.status === "PREPARING" ? "bg-yellow-200 text-yellow-800" : "bg-gray-200 text-gray-800"}`}>{item.status}</span>
-                    </div>
-                    {item.notes && <p className="text-sm text-gray-700 mt-1 italic">Note: {item.notes}</p>}
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar for menu items and ingredients */}
+          <aside className="md:w-1/4 w-full bg-white/80 rounded-2xl shadow-lg p-6 mb-8 md:mb-0">
+            <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Menu & Ingredienser</h2>
+            <div className="space-y-4 max-h-[45vh] overflow-y-auto">
+              {menuItems.length === 0 ? (
+                <div className="text-gray-400 text-center">Ingen menupunkter</div>
+              ) : menuItems.map(item => (
+                <div key={item.id} className="border-b pb-3 mb-3 last:border-b-0 last:pb-0 last:mb-0">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-gray-900">{item.name}</span>
+                    <span className={`text-xs font-bold px-2 py-1 rounded ${item.available ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{item.available ? "Tilgængelig" : "Udsolgt"}</span>
                   </div>
-                ))}
-              </div>
-              <div className="flex space-x-2">
-                {order.status === "PENDING" && <button onClick={()=>updateOrderStatus(order.id,"CONFIRMED")} className="px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition">Bekræft</button>}
-                {order.status === "CONFIRMED" && <button onClick={()=>updateOrderStatus(order.id,"PREPARING")} className="px-4 py-2 bg-orange-600 text-white rounded-2xl hover:bg-orange-700 transition">Start tilberedning</button>}
-                {order.status === "PREPARING" && <button onClick={()=>updateOrderStatus(order.id,"READY")} className="px-4 py-2 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition">Klar til servering</button>}
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* Menu Management */}
-        <section className="space-y-4">
-          <div className="bg-white p-6 rounded-2xl shadow space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Menu Administration</h2>
-            <select value={selectedCategory} onChange={e=>setSelectedCategory(e.target.value)} className="w-full border border-gray-300 rounded-2xl px-3 py-2">
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {filteredMenuItems.map(item => (
-                <div key={item.id} className="bg-burgundy-light p-3 rounded-2xl border border-burgundy-primary">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="font-semibold">{item.name}</h4>
-                      <p className="text-sm text-gray-700">{item.category}</p>
-                      <p className="text-xs text-gray-600">Tilberedningstid: {item.prepTime} min</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${item.available?"bg-green-100 text-green-800":"bg-red-100 text-red-800"}`}>{item.available?"Tilgængeligt":"Ikke tilgængeligt"}</span>
-                  </div>
-                  <button onClick={()=>updateItemAvailability(item.id,!item.available)} className={`w-full px-3 py-2 rounded-2xl text-sm font-medium ${item.available?"bg-red-600 text-white hover:bg-red-700":"bg-green-600 text-white hover:bg-green-700"} transition`}>{item.available?"Marker som udsolgt":"Marker som tilgængelig"}</button>
+                  <div className="text-xs text-gray-600 mb-1">{item.category}</div>
+                  {item.ingredients && Array.isArray(item.ingredients) && item.ingredients.length > 0 && (
+                    <div className="text-xs text-gray-700">Ingredienser: <span className="font-medium">{item.ingredients.join(", ")}</span></div>
+                  )}
+                  <button
+                    onClick={() => updateItemAvailability(item.id, !item.available)}
+                    className={`mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold shadow transition border-2
+                      ${item.available
+                        ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100 hover:border-red-500"
+                        : "bg-green-50 border-green-400 text-green-700 hover:bg-green-100 hover:border-green-500"}
+                    `}
+                    title={item.available ? "Marker som udsolgt" : "Marker som tilgængelig"}
+                  >
+                    {item.available ? (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        Udsolgt
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        Tilgængelig
+                      </>
+                    )}
+                  </button>
                 </div>
               ))}
-              {filteredMenuItems.length===0 && <p className="text-gray-500 text-center py-4">Ingen menupunkter</p>}
             </div>
-          </div>
-        </section>
+          </aside>
+          {/* Main kitchen order columns */}
+          <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {statusColumns.map(col => (
+                <section key={col.key} className="space-y-6">
+                  <h2 className="text-xl font-bold text-center text-gray-800 mb-4 tracking-wide uppercase drop-shadow-sm">{col.label}</h2>
+                  {activeOrders.filter(o => o.status === col.key).length === 0 ? (
+                    <div className="bg-white/80 p-6 rounded-2xl shadow text-center text-gray-400 text-lg font-medium">Ingen ordrer</div>
+                  ) : activeOrders.filter(o => o.status === col.key).map(order => (
+                    <div key={order.id} className="bg-white/95 p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-bold text-2xl text-burgundy-primary">#{order.id.slice(0, 6)}</h3>
+                        <span className="text-sm font-semibold capitalize text-gray-700 bg-gray-100 px-3 py-1 rounded-full shadow-inner">{order.status?.toLowerCase?.() || "ukendt"}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mb-3">{timeSinceOrder(order.createdAt)}</div>
+                      <div className="space-y-3">
+                        {Array.isArray(order.items) && order.items.length > 0 ? order.items.map(item => {
+                          const menuItem = menuItems.find(m => m.name === item.menuItem?.name && m.category === item.menuItem?.category);
+                          return (
+                            <div key={item.id} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex flex-col gap-1">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-lg text-gray-900">{item.quantity}x {item.menuItem?.name || ""}</span>
+                                <span className="text-sm text-gray-700 font-medium">{item.menuItem?.category || ""}</span>
+                              </div>
+                              {item.notes && <span className="text-xs text-gray-600 italic">{item.notes}</span>}
+                              {menuItem?.ingredients && Array.isArray(menuItem.ingredients) && menuItem.ingredients.length > 0 && (
+                                <div className="text-xs text-gray-700 mt-1">Ingredienser: <span className="font-medium">{menuItem.ingredients.join(", ")}</span></div>
+                              )}
+                            </div>
+                          );
+                        }) : <p className="text-gray-400">Ingen varer</p>}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                        {order.status === "PENDING" && (
+                          <button onClick={() => updateOrderStatus(order.id, "PREPARING")}
+                            className="px-4 py-2 bg-orange-500 text-white rounded-xl font-semibold shadow hover:bg-orange-600 transition">Start tilberedning</button>
+                        )}
+                        {order.status === "PREPARING" && (
+                          <button onClick={() => updateOrderStatus(order.id, "READY")}
+                            className="px-4 py-2 bg-green-600 text-white rounded-xl font-semibold shadow hover:bg-green-700 transition">Marker som klar</button>
+                        )}
+                        {order.status === "READY" && (
+                          <button onClick={() => updateOrderStatus(order.id, "SERVED")}
+                            className="px-4 py-2 bg-gray-700 text-white rounded-xl font-semibold shadow hover:bg-gray-800 transition">Marker som serveret</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+              ))}
+            </div>
+          </div>{/* end flex-1 */}
+        </div>{/* end flex row */}
       </main>
     </div>
   );
