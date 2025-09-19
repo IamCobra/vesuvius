@@ -17,10 +17,8 @@ cp .env.local.template .env
 
 # 4. Start database (Docker)
 docker-compose -f docker-compose.local.yml up -d
-
 # 5. Wait 10 seconds, then setup schema
-docker exec -i vesuvius-postgres-1 psql -U postgres -d vesuvius_db < create-schema.sql
-
+Get-Content .\create-schema.sql | docker exec -i vesuvius-postgres-1 psql -U postgres -d vesuvius_db
 # 6. Start development server
 npm run dev
 ```
