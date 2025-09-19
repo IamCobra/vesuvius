@@ -1,0 +1,32 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/app/lib/prisma";
+
+// PUT: update a menu item
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const body = await request.json();
+    const item = await prisma.menuItem.update({
+      where: { id: params.id },
+      data: {
+        name: body.name,
+        price: body.price,
+        category: body.category,
+        description: body.description,
+        available: body.available,
+      },
+    });
+    return NextResponse.json({ success: true, item });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+// DELETE: delete a menu item
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    await prisma.menuItem.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
