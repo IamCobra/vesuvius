@@ -118,44 +118,62 @@ export default function KitchenDashboard() {
     <div className="min-h-screen bg-burgundy-light font-sans">
       <main className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar for menu items and ingredients */}
-        <aside className="col-span-1 bg-white rounded-2xl p-4 shadow-lg mb-8 lg:mb-0">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 text-center">Menu & Ingredienser</h2>
-          <div className="space-y-4 max-h-[45vh] overflow-y-auto">
-            {menuItems.length === 0 ? (
-              <div className="text-gray-400 text-center">Ingen menupunkter</div>
-            ) : menuItems.map(item => (
-              <div key={item.id} className="border-b pb-3 mb-3 last:border-b-0 last:pb-0 last:mb-0">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-semibold text-gray-900">{item.name}</span>
-                  <span className={`text-xs font-bold px-2 py-1 rounded-2xl ${item.available ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{item.available ? "Tilgængelig" : "Udsolgt"}</span>
-                </div>
-                <div className="text-xs text-gray-700 mb-1">{item.category}</div>
-                {item.ingredients && Array.isArray(item.ingredients) && item.ingredients.length > 0 && (
-                  <div className="text-xs text-gray-700">Ingredienser: <span className="font-medium">{item.ingredients.join(", ")}</span></div>
-                )}
-                <button
-                  onClick={() => updateItemAvailability(item.id, !item.available)}
-                  className={`mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-2xl text-sm font-semibold shadow transition border-2
-                    ${item.available
-                      ? "bg-red-50 border-red-400 text-red-700 hover:bg-red-100 hover:border-red-500"
-                      : "bg-green-50 border-green-400 text-green-700 hover:bg-green-100 hover:border-green-500"}
-                  `}
-                  title={item.available ? "Marker som udsolgt" : "Marker som tilgængelig"}
-                >
-                  {item.available ? (
-                    <>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                      Udsolgt
-                    </>
-                  ) : (
-                    <>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                      Tilgængelig
-                    </>
+        <aside className="col-span-1 flex flex-col gap-6 mb-8 lg:mb-0">
+          {/* Available Items */}
+          <div className="bg-white rounded-2xl p-4 shadow-lg">
+            <h2 className="text-lg font-bold text-green-700 mb-4 text-center">Tilgængelige retter</h2>
+            <div className="space-y-4 max-h-[35vh] overflow-y-auto">
+              {menuItems.filter(i => i.available).length === 0 ? (
+                <div className="text-gray-400 text-center">Ingen tilgængelige retter</div>
+              ) : menuItems.filter(i => i.available).map(item => (
+                <div key={item.id} className="border-b pb-3 mb-3 last:border-b-0 last:pb-0 last:mb-0">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-gray-900">{item.name}</span>
+                    <span className="text-xs font-bold px-2 py-1 rounded-2xl bg-green-100 text-green-800">Tilgængelig</span>
+                  </div>
+                  <div className="text-xs text-gray-700 mb-1">{item.category}</div>
+                  {item.ingredients && Array.isArray(item.ingredients) && item.ingredients.length > 0 && (
+                    <div className="text-xs text-gray-700">Ingredienser: <span className="font-medium">{item.ingredients.join(", ")}</span></div>
                   )}
-                </button>
-              </div>
-            ))}
+                  <button
+                    onClick={() => updateItemAvailability(item.id, false)}
+                    className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-2xl text-sm font-semibold shadow transition border-2 bg-red-50 border-red-400 text-red-700 hover:bg-red-100 hover:border-red-500"
+                    title="Marker som udsolgt"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    Udsolgt
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Sold Out Items */}
+          <div className="bg-white rounded-2xl p-4 shadow-lg">
+            <h2 className="text-lg font-bold text-red-700 mb-4 text-center">Udsolgte retter</h2>
+            <div className="space-y-4 max-h-[35vh] overflow-y-auto">
+              {menuItems.filter(i => !i.available).length === 0 ? (
+                <div className="text-gray-400 text-center">Ingen udsolgte retter</div>
+              ) : menuItems.filter(i => !i.available).map(item => (
+                <div key={item.id} className="border-b pb-3 mb-3 last:border-b-0 last:pb-0 last:mb-0">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-gray-900">{item.name}</span>
+                    <span className="text-xs font-bold px-2 py-1 rounded-2xl bg-red-100 text-red-800">Udsolgt</span>
+                  </div>
+                  <div className="text-xs text-gray-700 mb-1">{item.category}</div>
+                  {item.ingredients && Array.isArray(item.ingredients) && item.ingredients.length > 0 && (
+                    <div className="text-xs text-gray-700">Ingredienser: <span className="font-medium">{item.ingredients.join(", ")}</span></div>
+                  )}
+                  <button
+                    onClick={() => updateItemAvailability(item.id, true)}
+                    className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-2xl text-sm font-semibold shadow transition border-2 bg-green-50 border-green-400 text-green-700 hover:bg-green-100 hover:border-green-500"
+                    title="Marker som tilgængelig"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    Tilgængelig
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </aside>
         {/* Main kitchen order columns */}
