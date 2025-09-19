@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                   value={query}
                   onChange={(e)=>setQuery(e.target.value)}
                   placeholder="Søg i menupunkter..."
-                  className="px-3 py-2 border rounded-2xl w-48 text-sm focus:ring-2 focus:ring-burgundy-primary focus:outline-none"
+                  className="px-3 py-2 border rounded-2xl w-48 text-sm focus:ring-2 focus:ring-burgundy-primary focus:outline-none text-gray-900 bg-white placeholder-gray-500"
                 />
                 <AddMenuItemButton onAdd={fetchMenu} />
               </div>
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="font-semibold text-gray-900">{m.name}</h4>
-                      <p className="text-sm text-gray-600">{m.category} • {m.price ? (m.price/100).toFixed(2)+" kr":"–"}</p>
+                        <p className="text-sm text-gray-800">{m.category} • {m.price !== undefined && m.price !== null && !isNaN(Number(m.price)) ? Number(m.price).toFixed(2) + " kr" : "–"}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
                           await fetch(`/api/admin/menu/${m.id}`,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({...m,name:edited})});
                           fetchMenu();
                         }}
-                        className="text-sm px-3 py-1 rounded-2xl border hover:bg-burgundy-light transition"
+                        className="text-sm px-3 py-1 rounded-2xl border bg-burgundy-primary text-white hover:bg-burgundy-dark transition"
                       >
                         Rediger
                       </button>
@@ -233,9 +233,9 @@ export default function AdminDashboard() {
 function Card({ title, value, subtitle }: { title:string; value:string; subtitle?:string }) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-lg flex flex-col hover:shadow-xl transition">
-      <span className="text-sm text-gray-500">{title}</span>
-      <strong className="text-2xl mt-2 text-gray-900">{value}</strong>
-      {subtitle && <span className="text-xs text-gray-400 mt-1">{subtitle}</span>}
+      <span className="text-sm text-gray-800">{title}</span>
+      <strong className="text-2xl mt-2 text-burgundy-primary">{value}</strong>
+      {subtitle && <span className="text-xs text-gray-700 mt-1">{subtitle}</span>}
     </div>
   );
 }
@@ -258,13 +258,17 @@ function AddMenuModal({ onClose }: { onClose:()=>void }) {
 
   async function submit() {
     if(!name) return alert("Indtast navn");
-    await fetch("/api/admin/menu",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name,price_cents:Math.round(price*100),category,description})});
+    await fetch("/api/admin/menu",{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify({name,price,category,description})
+    });
     onClose();
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+  <div className="bg-white rounded-2xl p-6 w-full max-w-lg text-gray-900">
         <h3 className="text-lg font-semibold mb-3">Tilføj ny ret</h3>
         <div className="grid grid-cols-1 gap-3">
           <label className="text-sm">Navn<input value={name} onChange={(e)=>setName(e.target.value)} className="w-full border px-2 py-1 rounded-2xl mt-1"/></label>
