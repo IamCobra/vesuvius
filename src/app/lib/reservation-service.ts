@@ -18,7 +18,7 @@ interface ReservationRequest {
   };
 }
 
-export class ReservationService {
+class ReservationService {
   /**
    * Find available tables using 2-top combination strategy
    * Prioritizes 2-person tables and combines them for larger parties
