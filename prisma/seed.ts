@@ -6,6 +6,7 @@ async function main() {
   console.log("Seeding database...");
 
   // Clear existing data in correct order to handle foreign key constraints
+  console.log("Clearing existing data...");
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.reservedTable.deleteMany();
@@ -16,7 +17,8 @@ async function main() {
   await prisma.menuItemVariant.deleteMany();
   await prisma.menuItem.deleteMany();
   await prisma.category.deleteMany();
-  
+  console.log("Data cleared successfully");
+
   // Create categories
   const categories = await Promise.all([
     prisma.category.create({
@@ -59,7 +61,7 @@ async function main() {
         price: 129.0,
         categoryId: categories[0].id,
         image:
-          "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=500&h=400&fit=crop",
+          "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=400&fit=crop",
       },
     }),
     prisma.menuItem.create({
@@ -116,7 +118,7 @@ async function main() {
         price: 149.0,
         categoryId: categories[1].id,
         image:
-          "https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=500&h=400&fit=crop",
+          "https://images.unsplash.com/photo-1571091655789-405eb7a3a3a8?w=500&h=400&fit=crop",
       },
     }),
     prisma.menuItem.create({
@@ -173,7 +175,7 @@ async function main() {
         price: 149.0,
         categoryId: categories[2].id,
         image:
-          "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&h=400&fit=crop",
+          "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=500&h=400&fit=crop",
       },
     }),
 
