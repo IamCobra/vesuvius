@@ -650,7 +650,10 @@ export default function Reservation() {
                       value={reservationData.phone}
                       onChange={(e) => {
                         // Only allow numbers, spaces, + and - characters
-                        const value = e.target.value.replace(/[^0-9\s\+\-]/g, '');
+                        const value = e.target.value.replace(
+                          /[^0-9\s\+\-]/g,
+                          ""
+                        );
                         updateReservationData("phone", value);
                       }}
                       pattern="[0-9\s\+\-]+"

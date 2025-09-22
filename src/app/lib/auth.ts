@@ -60,8 +60,18 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token) {
+        // Tjek om brugeren stadig eksisterer i databasen
+        const existingUser = await prisma.user.findUnique({
+          where: { id: token.sub }
+        });
+
+        // Hvis brugeren ikke eksisterer længere, return null for at logge ud
+        if (!existingUser) {
+          return null;
+        }
+
         session.user.id = token.sub;
-        session.user.role = token.role;
+        session.user.role = existingUser.role; // Brug opdateret rolle fra database
       }
       return session;
     },
