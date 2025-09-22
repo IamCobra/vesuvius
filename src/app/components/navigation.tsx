@@ -20,12 +20,6 @@ export default function Navigation() {
     { href: "/menu", label: "Menu" },
     { href: "/reservation", label: "Reservation" },
     { href: "/contact", label: "Kontakt" },
-    {
-      href: "/admin/dashboard",
-      label: "Admin",
-      className:
-        "border border-burgundy-primary px-3 py-1 rounded-md hover:bg-burgundy-primary hover:text-white",
-    },
   ];
 
   return (
