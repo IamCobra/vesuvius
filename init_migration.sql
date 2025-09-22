@@ -1,25 +1,48 @@
-/*
-  Warnings:
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
 
-  - You are about to drop the `Reservation` table. If the table is not empty, all the data it contains will be lost.
+-- CreateEnum
+CREATE TYPE "public"."ReservationStatus" AS ENUM ('CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW');
 
-*/
 -- CreateEnum
 CREATE TYPE "public"."OrderStatus" AS ENUM ('ORDERED', 'IN_PREPARATION', 'READY', 'SERVED', 'COMPLETED', 'CANCELLED');
 
--- AlterEnum
--- This migration adds more than one value to an enum.
--- With PostgreSQL versions 11 and earlier, this is not possible
--- in a single migration. This can be worked around by creating
--- multiple migrations, each migration adding only one value to
--- the enum.
+-- CreateTable
+CREATE TABLE "public"."categories" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
+    CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
+);
 
-ALTER TYPE "public"."ReservationStatus" ADD VALUE 'COMPLETED';
-ALTER TYPE "public"."ReservationStatus" ADD VALUE 'NO_SHOW';
+-- CreateTable
+CREATE TABLE "public"."menu_items" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "price" DECIMAL(10,2) NOT NULL,
+    "image" TEXT,
+    "available" BOOLEAN NOT NULL DEFAULT true,
+    "categoryId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- DropTable
-DROP TABLE "public"."Reservation";
+    CONSTRAINT "menu_items_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."menu_item_variants" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "priceChange" DECIMAL(10,2) NOT NULL,
+    "menuItemId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "menu_item_variants_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "public"."customers" (
@@ -61,9 +84,9 @@ CREATE TABLE "public"."dining_tables" (
 CREATE TABLE "public"."reservations" (
     "id" TEXT NOT NULL,
     "partySize" INTEGER NOT NULL,
-    "reservationDate" TIMESTAMP(3) NOT NULL,
-    "customerId" TEXT NOT NULL,
-    "timeSlotId" TEXT NOT NULL,
+    "slotStartUtc" TIMESTAMP(3) NOT NULL,
+    "slotEndUtc" TIMESTAMP(3) NOT NULL,
+    "customerId" TEXT,
     "status" "public"."ReservationStatus" NOT NULL DEFAULT 'CONFIRMED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -74,6 +97,8 @@ CREATE TABLE "public"."reservations" (
 -- CreateTable
 CREATE TABLE "public"."reserved_tables" (
     "id" TEXT NOT NULL,
+    "startUtc" TIMESTAMP(3) NOT NULL,
+    "endUtc" TIMESTAMP(3) NOT NULL,
     "reservationId" TEXT NOT NULL,
     "tableId" TEXT NOT NULL,
 
@@ -87,7 +112,7 @@ CREATE TABLE "public"."orders" (
     "customerId" TEXT,
     "tableNumber" INTEGER,
     "status" "public"."OrderStatus" NOT NULL DEFAULT 'ORDERED',
-    "totalPrice" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalPrice" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "notes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -99,7 +124,7 @@ CREATE TABLE "public"."orders" (
 CREATE TABLE "public"."order_items" (
     "id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
-    "unitPrice" DOUBLE PRECISION NOT NULL,
+    "unitPrice" DECIMAL(10,2) NOT NULL,
     "orderId" TEXT NOT NULL,
     "menuItemId" TEXT NOT NULL,
     "customizations" JSONB,
@@ -109,6 +134,49 @@ CREATE TABLE "public"."order_items" (
     CONSTRAINT "order_items_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."OpeningHour" (
+    "id" TEXT NOT NULL,
+    "weekday" INTEGER NOT NULL,
+    "openTime" TEXT NOT NULL,
+    "closeTime" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "OpeningHour_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."blackouts" (
+    "id" TEXT NOT NULL,
+    "startUtc" TIMESTAMPTZ NOT NULL,
+    "endUtc" TIMESTAMPTZ NOT NULL,
+    "reason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "blackouts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."SlotSetting" (
+    "id" INTEGER NOT NULL DEFAULT 1,
+    "slotMinutes" INTEGER NOT NULL DEFAULT 30,
+    "maxCoversPerSlot" INTEGER NOT NULL DEFAULT 24,
+    "maxPartySize" INTEGER NOT NULL DEFAULT 8,
+    "timezone" TEXT NOT NULL DEFAULT 'Europe/Copenhagen',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "SlotSetting_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "categories_name_key" ON "public"."categories"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "menu_items_categoryId_name_key" ON "public"."menu_items"("categoryId", "name");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "customers_email_key" ON "public"."customers"("email");
 
@@ -116,16 +184,28 @@ CREATE UNIQUE INDEX "customers_email_key" ON "public"."customers"("email");
 CREATE UNIQUE INDEX "dining_tables_tableNumber_key" ON "public"."dining_tables"("tableNumber");
 
 -- CreateIndex
-CREATE INDEX "reservations_reservationDate_timeSlotId_idx" ON "public"."reservations"("reservationDate", "timeSlotId");
+CREATE INDEX "reservations_slotStartUtc_idx" ON "public"."reservations"("slotStartUtc");
+
+-- CreateIndex
+CREATE INDEX "reservations_slotEndUtc_idx" ON "public"."reservations"("slotEndUtc");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "reserved_tables_reservationId_tableId_key" ON "public"."reserved_tables"("reservationId", "tableId");
 
--- AddForeignKey
-ALTER TABLE "public"."reservations" ADD CONSTRAINT "reservations_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "public"."customers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE INDEX "OpeningHour_weekday_idx" ON "public"."OpeningHour"("weekday");
+
+-- CreateIndex
+CREATE INDEX "blackouts_startUtc_endUtc_idx" ON "public"."blackouts"("startUtc", "endUtc");
 
 -- AddForeignKey
-ALTER TABLE "public"."reservations" ADD CONSTRAINT "reservations_timeSlotId_fkey" FOREIGN KEY ("timeSlotId") REFERENCES "public"."time_slots"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."menu_items" ADD CONSTRAINT "menu_items_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "public"."categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."menu_item_variants" ADD CONSTRAINT "menu_item_variants_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "public"."menu_items"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."reservations" ADD CONSTRAINT "reservations_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "public"."customers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."reserved_tables" ADD CONSTRAINT "reserved_tables_reservationId_fkey" FOREIGN KEY ("reservationId") REFERENCES "public"."reservations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -144,3 +224,4 @@ ALTER TABLE "public"."order_items" ADD CONSTRAINT "order_items_orderId_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "public"."order_items" ADD CONSTRAINT "order_items_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "public"."menu_items"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
