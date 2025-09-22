@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     // Check om bruger allerede eksisterer
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (existingUser) {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         role: "USER",
-      }
+      },
     });
 
     // Returner bruger uden password
@@ -51,9 +51,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: "Bruger oprettet succesfuldt",
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
-
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(

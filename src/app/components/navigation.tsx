@@ -49,7 +49,7 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
-            
+
             {/* Auth Section */}
             {status === "loading" ? (
               <div className="w-8 h-8 border-2 border-burgundy-primary border-t-transparent rounded-full animate-spin"></div>
@@ -60,14 +60,27 @@ export default function Navigation() {
                   className="flex items-center space-x-2 text-gray-700 hover:text-burgundy-primary transition-colors duration-300"
                 >
                   <div className="w-8 h-8 bg-burgundy-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                    {session.user.name?.[0]?.toUpperCase() || session.user.email[0]?.toUpperCase()}
+                    {session.user.name?.[0]?.toUpperCase() ||
+                      session.user.email[0]?.toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium">{session.user.name || session.user.email}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <span className="text-sm font-medium">
+                    {session.user.name || session.user.email}
+                  </span>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
-                
+
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
                     <div className="px-4 py-2 text-sm text-gray-500 border-b">
@@ -140,13 +153,15 @@ export default function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block py-3 px-3 rounded-md ${getLinkClass(item.href)}`}
+                  className={`block py-3 px-3 rounded-md ${getLinkClass(
+                    item.href
+                  )}`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </Link>
               ))}
-              
+
               {/* Mobile Auth Section */}
               <div className="border-t border-gray-200 pt-3">
                 {session ? (

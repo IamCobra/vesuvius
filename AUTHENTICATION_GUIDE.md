@@ -9,27 +9,32 @@ Vi har nu implementeret et fuldt funktionelt authentication system med NextAuth.
 ## 📋 **Hvad Vi Har Implementeret:**
 
 ### ✅ **1. Database Schema (Prisma)**
+
 - **User model** med rolle-baseret adgang (USER, ADMIN, WAITER, KITCHEN)
 - **Account, Session, VerificationToken** modeller for NextAuth.js
 - **Password hashing** med bcryptjs
 
 ### ✅ **2. NextAuth.js Konfiguration**
+
 - **JWT strategy** for token-baseret auth
 - **Credentials provider** for email/password login
 - **Custom callbacks** for rolle-håndtering
 - **Session management**
 
 ### ✅ **3. API Endpoints**
+
 - **`/api/auth/[...nextauth]`** - NextAuth.js handler
 - **`/api/auth/register`** - Bruger registrering med password hashing
 
 ### ✅ **4. Frontend Komponenter**
+
 - **Login side** (`/auth/signin`) - Elegant login form
 - **Signup side** (`/auth/signup`) - Registrering med validering
 - **Navigation** med auth status og user menu
 - **Admin dashboard** (`/admin`) - Rolle-beskyttet side
 
 ### ✅ **5. Security Features**
+
 - **Middleware** til rute-beskyttelse baseret på roller
 - **Password hashing** med bcrypt
 - **JWT tokens** for session management
@@ -40,6 +45,7 @@ Vi har nu implementeret et fuldt funktionelt authentication system med NextAuth.
 ## 🎯 **Hvordan Det Virker:**
 
 ### **User Flow:**
+
 1. **Ny bruger** → Går til `/auth/signup` → Opretter konto
 2. **Eksisterende bruger** → Går til `/auth/signin` → Logger ind
 3. **Authentication** → JWT token genereres og gemmes
@@ -47,6 +53,7 @@ Vi har nu implementeret et fuldt funktionelt authentication system med NextAuth.
 5. **Logout** → Token slettes, bruger sendes til forside
 
 ### **Admin Flow:**
+
 1. **Admin bruger** logger ind
 2. **Navigation** viser "Admin Panel" link
 3. **Middleware** checker rolle ved `/admin` access
@@ -57,13 +64,16 @@ Vi har nu implementeret et fuldt funktionelt authentication system med NextAuth.
 ## 🔧 **Hvordan At Bruge Det:**
 
 ### **1. Start Serveren:**
+
 ```bash
 npm run dev
 # App kører på http://localhost:3001
 ```
 
 ### **2. Opret Første Admin Bruger:**
+
 Du kan oprette en admin bruger ved at:
+
 - Gå til `/auth/signup`
 - Opret en bruger
 - Manuelt opdater `role` i databasen til "ADMIN"
@@ -74,6 +84,7 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'din@email.dk';
 ```
 
 ### **3. Test Authentication:**
+
 - **Login/Logout** - Test basis funktionalitet
 - **Protected Routes** - Prøv at gå til `/admin` uden login
 - **Role Access** - Test at kun admins kan se admin panel
@@ -83,19 +94,22 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'din@email.dk';
 ## 🛡️ **Security Features:**
 
 ### **Password Security:**
+
 - Passwords hashes med **bcryptjs** (12 rounds)
 - Ingen plaintext passwords i database
 
 ### **JWT Security:**
+
 - **NEXTAUTH_SECRET** for token signing
 - **Short-lived sessions** med automatic refresh
 - **httpOnly cookies** (NextAuth.js standard)
 
 ### **Role-Based Access:**
+
 ```typescript
 // Middleware checker automatisk:
 "/admin/*" → Kun ADMIN rolle
-"/waiter/*" → WAITER eller ADMIN rolle  
+"/waiter/*" → WAITER eller ADMIN rolle
 "/kitchen/*" → KITCHEN eller ADMIN rolle
 ```
 
@@ -104,12 +118,14 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'din@email.dk';
 ## 🎨 **UI Features:**
 
 ### **Navigation Updates:**
+
 - **Ikke logget ind**: "Log ind" + "Opret konto" knapper
 - **Logget ind**: User avatar + dropdown menu med logout
 - **Admin bruger**: Ekstra "Admin Panel" link
 - **Mobile responsive** auth menu
 
 ### **Form Features:**
+
 - **Real-time validation**
 - **Loading states** med spinners
 - **Error handling** med brugervenlige beskeder
@@ -144,20 +160,22 @@ src/
 ## 🚀 **Næste Skridt:**
 
 ### **Forbedringer Du Kan Tilføje:**
+
 1. **Email verification** for nye brugere
-2. **Password reset** funktionalitet  
+2. **Password reset** funktionalitet
 3. **OAuth providers** (Google, Facebook)
 4. **User management** i admin panel
 5. **Audit logging** for admin handlinger
 
 ### **Integration Med Reservations:**
+
 ```typescript
 // Du kan nu linke reservationer til brugere:
 const reservation = await prisma.reservation.create({
   data: {
     // ... reservation data
     customerId: session.user.id, // Link til logged-in user
-  }
+  },
 });
 ```
 
@@ -166,8 +184,9 @@ const reservation = await prisma.reservation.create({
 ## 🎉 **Resultat:**
 
 Du har nu et **professionelt authentication system** med:
+
 - ✅ Sikker password håndtering
-- ✅ JWT token-baseret sessions  
+- ✅ JWT token-baseret sessions
 - ✅ Rolle-baseret adgangskontrol
 - ✅ Responsive UI med auth states
 - ✅ Middleware beskyttelse
