@@ -113,7 +113,7 @@ export default function AdminDashboard() {
   };
   const fetchMenu = async () => {
     try {
-      const res = await fetch("/api/admin/menu");
+      const res = await fetch("/api/menu/items?admin=true");
       if (!res.ok) throw new Error();
       const j = await res.json();
       setMenu(j.items || []);
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
                         onClick={async () => {
                           const edited = prompt("Rediger navn:", m.name);
                           if (!edited) return;
-                          await fetch(`/api/admin/menu/${m.id}`, {
+                          await fetch(`/api/menu/items/${m.id}`, {
                             method: "PUT",
                             headers: { "content-type": "application/json" },
                             body: JSON.stringify({ ...m, name: edited }),
@@ -304,7 +304,7 @@ export default function AdminDashboard() {
                       <button
                         onClick={async () => {
                           if (!confirm("Slet denne ret?")) return;
-                          await fetch(`/api/admin/menu/${m.id}`, {
+                          await fetch(`/api/menu/items/${m.id}`, {
                             method: "DELETE",
                           });
                           fetchMenu();
@@ -388,10 +388,10 @@ function AddMenuModal({ onClose }: { onClose: () => void }) {
 
   async function submit() {
     if (!name) return alert("Indtast navn");
-    await fetch("/api/admin/menu", {
+    await fetch("/api/menu/items", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, price, category, description }),
+      body: JSON.stringify({ name, price, categoryId: category, description }),
     });
     onClose();
   }

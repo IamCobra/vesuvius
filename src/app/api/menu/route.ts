@@ -32,11 +32,15 @@ export async function GET() {
       })),
     }));
 
-    return NextResponse.json(serializedCategories);
+    return NextResponse.json({
+      success: true,
+      categories: serializedCategories,
+      count: serializedCategories.length
+    });
   } catch (error) {
     console.error("Error fetching menu:", error);
     return NextResponse.json(
-      { error: "Failed to fetch menu" },
+      { success: false, error: "Failed to fetch menu" },
       { status: 500 }
     );
   }
