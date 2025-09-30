@@ -5,12 +5,25 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 // Recharts dynamiske imports
-const AreaChart = dynamic(() => import("recharts").then((m) => m.AreaChart), { ssr: false });
-const Area = dynamic(() => import("recharts").then((m) => m.Area), { ssr: false });
-const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
-const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
-const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
+const AreaChart = dynamic(() => import("recharts").then((m) => m.AreaChart), {
+  ssr: false,
+});
+const Area = dynamic(() => import("recharts").then((m) => m.Area), {
+  ssr: false,
+});
+const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), {
+  ssr: false,
+});
+const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), {
+  ssr: false,
+});
+const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), {
+  ssr: false,
+});
+const ResponsiveContainer = dynamic(
+  () => import("recharts").then((m) => m.ResponsiveContainer),
+  { ssr: false }
+);
 
 // debounce hook
 function useDebounced<T>(value: T, delay = 300): T {
@@ -39,8 +52,14 @@ function useSessionTimeout(onTimeout: () => void, timeoutMs = 30 * 60 * 1000) {
   }, [onTimeout, timeoutMs]);
 }
 
-interface Session { role: string; name: string; }
-interface TrendPoint { date: string; revenue: number; }
+interface Session {
+  role: string;
+  name: string;
+}
+interface TrendPoint {
+  date: string;
+  revenue: number;
+}
 interface Stats {
   dailyRevenueFormatted?: string;
   monthlyRevenueFormatted?: string;
@@ -49,7 +68,15 @@ interface Stats {
   topDishes?: { name: string; count: number }[];
   trend?: TrendPoint[];
 }
-interface MenuItem { id: string; name: string; category?: string; price?: number; description?: string; tags?: string[]; is_active?: boolean; }
+interface MenuItem {
+  id: string;
+  name: string;
+  category?: string;
+  price?: number;
+  description?: string;
+  tags?: string[];
+  is_active?: boolean;
+}
 
 export default function AdminDashboard() {
   const [session, setSession] = useState<Session | null>(null);
@@ -60,43 +87,73 @@ export default function AdminDashboard() {
   const debouncedQuery = useDebounced(query, 250);
 
   useSessionTimeout(() => {
-    fetch("/api/auth/logout", { method: "POST" }).finally(() => window.location.href = "/login");
+    fetch("/api/auth/logout", { method: "POST" }).finally(
+      () => (window.location.href = "/login")
+    );
   }, 30 * 60 * 1000);
 
   const filteredMenu = useMemo(() => {
     if (!debouncedQuery) return menu;
     const q = debouncedQuery.toLowerCase();
-    return menu.filter(m => m.name.toLowerCase().includes(q) || (m.description || "").toLowerCase().includes(q));
+    return menu.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        (m.description || "").toLowerCase().includes(q)
+    );
   }, [menu, debouncedQuery]);
 
   const fetchStats = async () => {
-    try { const res = await fetch("/api/admin/stats"); if (!res.ok) throw new Error(); setStats(await res.json()); } 
-    catch (err) { console.error(err); }
+    try {
+      const res = await fetch("/api/admin/stats");
+      if (!res.ok) throw new Error();
+      setStats(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
   };
   const fetchMenu = async () => {
-    try { const res = await fetch("/api/admin/menu"); if (!res.ok) throw new Error(); const j = await res.json(); setMenu(j.items || []); } 
-    catch (err) { console.error(err); }
+    try {
+      const res = await fetch("/api/admin/menu");
+      if (!res.ok) throw new Error();
+      const j = await res.json();
+      setMenu(j.items || []);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  useEffect(() => { setSession({ role: "admin", name: "Dev Tester" }); setLoadingSession(false); }, []);
+  useEffect(() => {
+    setSession({ role: "admin", name: "Dev Tester" });
+    setLoadingSession(false);
+  }, []);
 
   useEffect(() => {
     if (!session) return;
-    fetchStats(); fetchMenu();
+    fetchStats();
+    fetchMenu();
   }, [session]);
 
-  if (loadingSession) return <div className="p-8 text-gray-900">Indlæser session...</div>;
-  if (!session || session.role !== "admin") return (
-    <div className="min-h-screen flex items-center justify-center bg-burgundy-light">
-      <div className="bg-white p-8 rounded-2xl shadow-lg text-center">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900">Adgang nægtet</h2>
-        <p className="mb-6 text-gray-700">Du skal være administrator for at se denne side.</p>
-        <Link href="/login" className="px-4 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl transition">
-          Log ind
-        </Link>
+  if (loadingSession)
+    return <div className="p-8 text-gray-900">Indlæser session...</div>;
+  if (!session || session.role !== "admin")
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-burgundy-light">
+        <div className="bg-white p-8 rounded-2xl shadow-lg text-center">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            Adgang nægtet
+          </h2>
+          <p className="mb-6 text-gray-700">
+            Du skal være administrator for at se denne side.
+          </p>
+          <Link
+            href="/login"
+            className="px-4 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl transition"
+          >
+            Log ind
+          </Link>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-burgundy-light">
@@ -104,9 +161,15 @@ export default function AdminDashboard() {
         {/* Sidebar */}
         <aside className="col-span-1 bg-white rounded-2xl p-4 shadow-lg">
           <nav className="space-y-3">
-            {["Oversigt","Menu Editor","Statistik"].map((label,i)=>
-              <a key={i} href={`#${label.toLowerCase().replace(' ','')}`} className="block py-2 px-4 rounded-2xl hover:bg-burgundy-light text-gray-900 font-semibold transition">{label}</a>
-            )}
+            {["Oversigt", "Menu Editor", "Statistik"].map((label, i) => (
+              <a
+                key={i}
+                href={`#${label.toLowerCase().replace(" ", "")}`}
+                className="block py-2 px-4 rounded-2xl hover:bg-burgundy-light text-gray-900 font-semibold transition"
+              >
+                {label}
+              </a>
+            ))}
           </nav>
         </aside>
 
@@ -114,43 +177,89 @@ export default function AdminDashboard() {
         <main className="col-span-1 lg:col-span-3 space-y-6">
           {/* Cards */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card title="Daglig omsætning" value={stats?.dailyRevenueFormatted || "–"} subtitle="I dag" />
-            <Card title="Månedlig omsætning" value={stats?.monthlyRevenueFormatted || "–"} subtitle="Denne måned" />
-            <Card title="Bordudnyttelse" value={stats?.tableUtilization !== undefined ? `${Math.round(stats.tableUtilization*100)}%`:"–"} subtitle="Booked vs tilgængelig" />
-            <Card title="Top ret" value={stats?.topDish?.name || "–"} subtitle={`Solgt: ${stats?.topDish?.count||0}`} />
+            <Card
+              title="Daglig omsætning"
+              value={stats?.dailyRevenueFormatted || "–"}
+              subtitle="I dag"
+            />
+            <Card
+              title="Månedlig omsætning"
+              value={stats?.monthlyRevenueFormatted || "–"}
+              subtitle="Denne måned"
+            />
+            <Card
+              title="Bordudnyttelse"
+              value={
+                stats?.tableUtilization !== undefined
+                  ? `${Math.round(stats.tableUtilization * 100)}%`
+                  : "–"
+              }
+              subtitle="Booked vs tilgængelig"
+            />
+            <Card
+              title="Top ret"
+              value={stats?.topDish?.name || "–"}
+              subtitle={`Solgt: ${stats?.topDish?.count || 0}`}
+            />
           </section>
 
           {/* Trend graf */}
           <section className="bg-white rounded-2xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold mb-3 text-gray-900">Omsætning — 30 dage</h3>
-            <div style={{height:220}}>
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">
+              Omsætning — 30 dage
+            </h3>
+            <div style={{ height: 220 }}>
               {stats?.trend ? (
                 <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={stats.trend} margin={{ top:5,right:20,left:0,bottom:5 }}>
+                  <AreaChart
+                    data={stats.trend}
+                    margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                  >
                     <defs>
                       <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--burgundy-primary)" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="var(--burgundy-primary)" stopOpacity={0}/>
+                        <stop
+                          offset="5%"
+                          stopColor="var(--burgundy-primary)"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--burgundy-primary)"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Area type="monotone" dataKey="revenue" stroke="var(--burgundy-primary)" fillOpacity={1} fill="url(#colorRev)" />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="var(--burgundy-primary)"
+                      fillOpacity={1}
+                      fill="url(#colorRev)"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
-              ) : <div className="text-sm text-gray-500">Ingen data</div>}
+              ) : (
+                <div className="text-sm text-gray-500">Ingen data</div>
+              )}
             </div>
           </section>
 
           {/* Menu Editor */}
-          <section id="menueditor" className="bg-white rounded-2xl p-6 shadow-lg">
+          <section
+            id="menueditor"
+            className="bg-white rounded-2xl p-6 shadow-lg"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Menu Editor</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Menu Editor
+              </h3>
               <div className="flex items-center gap-2">
                 <input
                   value={query}
-                  onChange={(e)=>setQuery(e.target.value)}
+                  onChange={(e) => setQuery(e.target.value)}
                   placeholder="Søg i menupunkter..."
                   className="px-3 py-2 border rounded-2xl w-48 text-sm focus:ring-2 focus:ring-burgundy-primary focus:outline-none text-gray-900 bg-white placeholder-gray-500"
                 />
@@ -159,19 +268,33 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredMenu.map(m => (
-                <article key={m.id} className="border rounded-2xl p-4 flex flex-col hover:shadow-lg transition">
+              {filteredMenu.map((m) => (
+                <article
+                  key={m.id}
+                  className="border rounded-2xl p-4 flex flex-col hover:shadow-lg transition"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="font-semibold text-gray-900">{m.name}</h4>
-                        <p className="text-sm text-gray-800">{m.category} • {m.price !== undefined && m.price !== null && !isNaN(Number(m.price)) ? Number(m.price).toFixed(2) + " kr" : "–"}</p>
+                      <p className="text-sm text-gray-800">
+                        {m.category} •{" "}
+                        {m.price !== undefined &&
+                        m.price !== null &&
+                        !isNaN(Number(m.price))
+                          ? Number(m.price).toFixed(2) + " kr"
+                          : "–"}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={async ()=>{
-                          const edited = prompt("Rediger navn:",m.name);
-                          if(!edited) return;
-                          await fetch(`/api/admin/menu/${m.id}`,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({...m,name:edited})});
+                        onClick={async () => {
+                          const edited = prompt("Rediger navn:", m.name);
+                          if (!edited) return;
+                          await fetch(`/api/admin/menu/${m.id}`, {
+                            method: "PUT",
+                            headers: { "content-type": "application/json" },
+                            body: JSON.stringify({ ...m, name: edited }),
+                          });
                           fetchMenu();
                         }}
                         className="text-sm px-3 py-1 rounded-2xl border bg-burgundy-primary text-white hover:bg-burgundy-dark transition"
@@ -179,9 +302,11 @@ export default function AdminDashboard() {
                         Rediger
                       </button>
                       <button
-                        onClick={async ()=>{
-                          if(!confirm("Slet denne ret?")) return;
-                          await fetch(`/api/admin/menu/${m.id}`,{method:"DELETE"});
+                        onClick={async () => {
+                          if (!confirm("Slet denne ret?")) return;
+                          await fetch(`/api/admin/menu/${m.id}`, {
+                            method: "DELETE",
+                          });
                           fetchMenu();
                         }}
                         className="text-sm px-3 py-1 rounded-2xl border border-red-600 text-red-600 hover:bg-red-100 transition"
@@ -190,14 +315,20 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-gray-700 flex-1">{m.description}</p>
+                  <p className="mt-2 text-sm text-gray-700 flex-1">
+                    {m.description}
+                  </p>
                   <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
                     <span>Tags: {m.tags?.join(", ") || "–"}</span>
                     <span>{m.is_active ? "Aktiv" : "Ude af kort"}</span>
                   </div>
                 </article>
               ))}
-              {filteredMenu.length === 0 && <div className="col-span-full text-center text-gray-500 py-6">Ingen menupunkter fundet</div>}
+              {filteredMenu.length === 0 && (
+                <div className="col-span-full text-center text-gray-500 py-6">
+                  Ingen menupunkter fundet
+                </div>
+              )}
             </div>
           </section>
         </main>
@@ -207,54 +338,112 @@ export default function AdminDashboard() {
 }
 
 /* ---------- Subcomponents ---------- */
-function Card({ title, value, subtitle }: { title:string; value:string; subtitle?:string }) {
+function Card({
+  title,
+  value,
+  subtitle,
+}: {
+  title: string;
+  value: string;
+  subtitle?: string;
+}) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-lg flex flex-col hover:shadow-xl transition">
       <span className="text-sm text-gray-800">{title}</span>
       <strong className="text-2xl mt-2 text-burgundy-primary">{value}</strong>
-      {subtitle && <span className="text-xs text-gray-700 mt-1">{subtitle}</span>}
+      {subtitle && (
+        <span className="text-xs text-gray-700 mt-1">{subtitle}</span>
+      )}
     </div>
   );
 }
 
-function AddMenuItemButton({ onAdd }: { onAdd?: ()=>void }) {
-  const [open,setOpen] = useState(false);
+function AddMenuItemButton({ onAdd }: { onAdd?: () => void }) {
+  const [open, setOpen] = useState(false);
   return (
     <div>
-      <button onClick={()=>setOpen(true)} className="px-4 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl font-semibold transition">Tilføj ret</button>
-      {open && <AddMenuModal onClose={()=>{setOpen(false); onAdd?.();}} />}
+      <button
+        onClick={() => setOpen(true)}
+        className="px-4 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl font-semibold transition"
+      >
+        Tilføj ret
+      </button>
+      {open && (
+        <AddMenuModal
+          onClose={() => {
+            setOpen(false);
+            onAdd?.();
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function AddMenuModal({ onClose }: { onClose:()=>void }) {
-  const [name,setName]=useState("");
-  const [price,setPrice]=useState(0);
-  const [category,setCategory]=useState("");
-  const [description,setDescription]=useState("");
+function AddMenuModal({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState(0);
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
 
   async function submit() {
-    if(!name) return alert("Indtast navn");
-    await fetch("/api/admin/menu",{
-      method:"POST",
-      headers:{"content-type":"application/json"},
-      body:JSON.stringify({name,price,category,description})
+    if (!name) return alert("Indtast navn");
+    await fetch("/api/admin/menu", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name, price, category, description }),
     });
     onClose();
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-  <div className="bg-white rounded-2xl p-6 w-full max-w-lg text-gray-900">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-lg text-gray-900">
         <h3 className="text-lg font-semibold mb-3">Tilføj ny ret</h3>
         <div className="grid grid-cols-1 gap-3">
-          <label className="text-sm">Navn<input value={name} onChange={(e)=>setName(e.target.value)} className="w-full border px-2 py-1 rounded-2xl mt-1"/></label>
-          <label className="text-sm">Pris (kr)<input type="number" value={price} onChange={(e)=>setPrice(Number(e.target.value))} className="w-full border px-2 py-1 rounded-2xl mt-1"/></label>
-          <label className="text-sm">Kategori<input value={category} onChange={(e)=>setCategory(e.target.value)} className="w-full border px-2 py-1 rounded-2xl mt-1"/></label>
-          <label className="text-sm">Beskrivelse<textarea value={description} onChange={(e)=>setDescription(e.target.value)} className="w-full border px-2 py-1 rounded-2xl mt-1"/></label>
+          <label className="text-sm">
+            Navn
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border px-2 py-1 rounded-2xl mt-1"
+            />
+          </label>
+          <label className="text-sm">
+            Pris (kr)
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+              className="w-full border px-2 py-1 rounded-2xl mt-1"
+            />
+          </label>
+          <label className="text-sm">
+            Kategori
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full border px-2 py-1 rounded-2xl mt-1"
+            />
+          </label>
+          <label className="text-sm">
+            Beskrivelse
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full border px-2 py-1 rounded-2xl mt-1"
+            />
+          </label>
           <div className="flex justify-end gap-2 mt-3">
-            <button onClick={onClose} className="px-3 py-2 border rounded-2xl">Annuller</button>
-            <button onClick={submit} className="px-3 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl">Gem</button>
+            <button onClick={onClose} className="px-3 py-2 border rounded-2xl">
+              Annuller
+            </button>
+            <button
+              onClick={submit}
+              className="px-3 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl"
+            >
+              Gem
+            </button>
           </div>
         </div>
       </div>
