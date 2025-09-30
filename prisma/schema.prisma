@@ -54,6 +54,18 @@ model User {
   @@map("users")
 }
 
+// Simple rate limiting
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  ipAddress String
+  attempts  Int      @default(1)
+  lastAttempt DateTime @default(now())
+  resetTime DateTime
+
+  @@unique([ipAddress])
+  @@map("login_attempts")
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique

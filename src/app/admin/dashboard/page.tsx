@@ -50,14 +50,12 @@ interface Stats {
   trend?: TrendPoint[];
 }
 interface MenuItem { id: string; name: string; category?: string; price?: number; description?: string; tags?: string[]; is_active?: boolean; }
-interface OrdersSummary { queued: number; in_progress: number; ready: number; complications: number; }
 
 export default function AdminDashboard() {
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [menu, setMenu] = useState<MenuItem[]>([]);
-  const [ordersSummary, setOrdersSummary] = useState<OrdersSummary>({ queued: 0, in_progress: 0, ready: 0, complications: 0 });
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounced(query, 250);
 
@@ -79,18 +77,12 @@ export default function AdminDashboard() {
     try { const res = await fetch("/api/admin/menu"); if (!res.ok) throw new Error(); const j = await res.json(); setMenu(j.items || []); } 
     catch (err) { console.error(err); }
   };
-  const fetchOrdersSummary = async () => {
-    try { const res = await fetch("/api/admin/orders/summary"); if (!res.ok) throw new Error(); const s: OrdersSummary = await res.json(); setOrdersSummary(s); } 
-    catch (err) { console.error(err); }
-  };
 
   useEffect(() => { setSession({ role: "admin", name: "Dev Tester" }); setLoadingSession(false); }, []);
 
   useEffect(() => {
     if (!session) return;
-    fetchStats(); fetchMenu(); fetchOrdersSummary();
-    const interval = setInterval(fetchOrdersSummary, 8000);
-    return () => clearInterval(interval);
+    fetchStats(); fetchMenu();
   }, [session]);
 
   if (loadingSession) return <div className="p-8 text-gray-900">Indlæser session...</div>;
@@ -112,7 +104,7 @@ export default function AdminDashboard() {
         {/* Sidebar */}
         <aside className="col-span-1 bg-white rounded-2xl p-4 shadow-lg">
           <nav className="space-y-3">
-            {["Oversigt","Menu Editor","Ordreoverblik","Statistik"].map((label,i)=>
+            {["Oversigt","Menu Editor","Statistik"].map((label,i)=>
               <a key={i} href={`#${label.toLowerCase().replace(' ','')}`} className="block py-2 px-4 rounded-2xl hover:bg-burgundy-light text-gray-900 font-semibold transition">{label}</a>
             )}
           </nav>
@@ -128,41 +120,26 @@ export default function AdminDashboard() {
             <Card title="Top ret" value={stats?.topDish?.name || "–"} subtitle={`Solgt: ${stats?.topDish?.count||0}`} />
           </section>
 
-          {/* Trend + ordre */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900">Omsætning — 30 dage</h3>
-              <div style={{height:220}}>
-                {stats?.trend ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={stats.trend} margin={{ top:5,right:20,left:0,bottom:5 }}>
-                      <defs>
-                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--burgundy-primary)" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="var(--burgundy-primary)" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="revenue" stroke="var(--burgundy-primary)" fillOpacity={1} fill="url(#colorRev)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : <div className="text-sm text-gray-500">Ingen data</div>}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-2">Ordre status</h4>
-              <ul className="space-y-2 text-gray-900">
-                <li className="flex justify-between"><span>Afventer</span><strong>{ordersSummary.queued}</strong></li>
-                <li className="flex justify-between"><span>I gang</span><strong>{ordersSummary.in_progress}</strong></li>
-                <li className="flex justify-between"><span>Færdig</span><strong>{ordersSummary.ready}</strong></li>
-                <li className="flex justify-between text-red-600"><span>Komplikationer</span><strong>{ordersSummary.complications}</strong></li>
-              </ul>
-              <Link href="/kitchen" className="mt-4 block text-center px-4 py-2 bg-burgundy-primary hover:bg-burgundy-dark text-white rounded-2xl transition">
-                Gå til køkkenskærm
-              </Link>
+          {/* Trend graf */}
+          <section className="bg-white rounded-2xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">Omsætning — 30 dage</h3>
+            <div style={{height:220}}>
+              {stats?.trend ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <AreaChart data={stats.trend} margin={{ top:5,right:20,left:0,bottom:5 }}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--burgundy-primary)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="var(--burgundy-primary)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="revenue" stroke="var(--burgundy-primary)" fillOpacity={1} fill="url(#colorRev)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : <div className="text-sm text-gray-500">Ingen data</div>}
             </div>
           </section>
 
