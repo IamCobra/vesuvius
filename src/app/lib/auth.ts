@@ -1,12 +1,12 @@
 /**
- * 🔐 NEXTAUTH KONFIGURATION - Håndterer login/logout på hjemmesiden
+ * NEXTAUTH KONFIGURATION - Håndterer login/logout på hjemmesiden
  *
  * Hvad er NextAuth?
  * - Et library der gør det nemt at lave login systemer i Next.js
  * - Håndterer sessions, JWT tokens, og sikkerhed automatisk
  * - Vi bruger "credentials" metoden (email + password)
  *
- * Hvordan fungerer det?
+ * Hvordan fungerer det:
  * 1. Bruger indtaster email/password på login siden
  * 2. NextAuth kalder "authorize" funktionen nedenfor
  * 3. Vi tjekker om email/password er korrekt i databasen
@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
       },
 
       /**
-       * 🔍 AUTHORIZE FUNKTION - Det vigtigste!
+       * AUTHORIZE FUNKTION - Det vigtigste!
        *
        * Denne funktion bliver kaldt hver gang nogen prøver at logge ind.
        * Den skal afgøre: Er denne person legitim?
@@ -71,7 +71,7 @@ export const authOptions: NextAuthOptions = {
           return null; // Afvis login
         }
 
-        // 🔐 TJEK PASSWORD: Er det indtastede password korrekt?
+        // TJEK PASSWORD: Er det indtastede password korrekt?
         // Vi bruger bcrypt.compare fordi passwords er krypteret i databasen
         const isPasswordValid = await bcrypt.compare(
           credentials.password, // Det password brugeren indtastede
@@ -95,7 +95,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  // ⏰ SESSION INDSTILLINGER
+  // SESSION INDSTILLINGER
   session: {
     strategy: "jwt", // Brug JWT tokens (sikre, serverless-venlige)
     maxAge: 60 * 60, // 1 time = 3600 sekunder
@@ -146,12 +146,12 @@ export const authOptions: NextAuthOptions = {
           where: { id: token.sub },
         });
 
-        // 🚨 Hvis brugeren er slettet, log dem ud automatisk
+        // Hvis brugeren er slettet, log dem ud automatisk
         if (!existingUser) {
           return null; // Dette trigger automatisk logout
         }
 
-        // ✅ Bruger eksisterer - opdater session med frisk data
+        // Bruger eksisterer - opdater session med frisk data
         session.user.id = token.sub;
         session.user.role = existingUser.role; // Rolle fra database (ikke token)
       }
