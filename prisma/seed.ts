@@ -17,6 +17,8 @@ async function main() {
   await prisma.menuItemVariant.deleteMany();
   await prisma.menuItem.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.employees.deleteMany();
+  await prisma.roles.deleteMany();
   console.log("Data cleared successfully");
 
   // Create categories
@@ -607,6 +609,16 @@ async function main() {
   ]);
 
   console.log("Order items created");
+
+  await Promise.all([
+    prisma.roles.createMany({
+      data:[
+        {roleName: 'ADMIN'},
+        {roleName: 'COOK'},
+        {roleName: 'WAITER'}
+      ]
+    })
+  ])
 
   console.log("Database seeding completed successfully!");
 }
