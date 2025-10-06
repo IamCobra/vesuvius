@@ -15,6 +15,7 @@ export async function PATCH(
       "ORDERED",
       "CONFIRMED",
       "PREPARING",
+      "IN_PREPARATION",
       "READY",
       "SERVED",
       "COMPLETED",

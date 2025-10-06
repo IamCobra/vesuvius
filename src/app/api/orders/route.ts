@@ -38,8 +38,13 @@ export async function GET(request: NextRequest) {
         },
       });
     } else {
-      // Get all orders
+      // Get all orders except completed ones (for general listing)
       orders = await prisma.order.findMany({
+        where: {
+          status: {
+            not: "COMPLETED",
+          },
+        },
         include: {
           items: {
             include: {
@@ -103,12 +108,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customerId, reservationId, items, notes } = body;
+    const { customerId, reservationId, items, notes, tableNumber } = body;
 
-    // Validate required fields
-    if (!customerId || !items || !Array.isArray(items) || items.length === 0) {
+    // Validate required fields - either customerId OR tableNumber is required
+    if ((!customerId && !tableNumber) || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields" },
+        { success: false, message: "Missing required fields: need customerId or tableNumber, and items" },
         { status: 400 }
       );
     }
@@ -136,8 +141,7 @@ export async function POST(request: NextRequest) {
         menuItemId: item.menuItemId,
         quantity: item.quantity,
         unitPrice: menuItem.price,
-        totalPrice: itemTotal,
-        notes: item.notes,
+        customizations: item.notes ? { notes: item.notes } : null,
       };
     });
 
@@ -147,6 +151,7 @@ export async function POST(request: NextRequest) {
         data: {
           customerId,
           reservationId,
+          tableNumber: tableNumber ? parseInt(tableNumber) : null,
           totalPrice: totalAmount,
           status: "ORDERED",
           notes,
