@@ -648,9 +648,15 @@ export default function Reservation() {
                     <input
                       type="tel"
                       value={reservationData.phone}
-                      onChange={(e) =>
-                        updateReservationData("phone", e.target.value)
-                      }
+                      onChange={(e) => {
+                        // Only allow numbers, spaces, + and - characters
+                        const value = e.target.value.replace(
+                          /[^0-9\s\+\-]/g,
+                          ""
+                        );
+                        updateReservationData("phone", value);
+                      }}
+                      pattern="[0-9\s\+\-]+"
                       className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-burgundy-primary focus:border-transparent bg-white text-gray-900 transition-colors"
                       placeholder="12 34 56 78"
                     />
