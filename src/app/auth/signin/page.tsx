@@ -17,7 +17,9 @@ export default function SignIn() {
   useEffect(() => {
     // Tjek om brugeren kommer fra signup
     if (searchParams.get("message") === "account-created") {
-      setSuccessMessage("Konto oprettet! Du kan nu logge ind med dit email og password.");
+      setSuccessMessage(
+        "Konto oprettet! Du kan nu logge ind med dit email og password."
+      );
     }
   }, [searchParams]);
 
@@ -68,7 +70,7 @@ export default function SignIn() {
                   {successMessage}
                 </div>
               )}
-              
+
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
                   {error}

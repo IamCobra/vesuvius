@@ -65,7 +65,6 @@ export default function SignUp() {
 
       // Success! Redirect til login side
       router.push("/auth/signin?message=account-created");
-      
     } catch (error) {
       setError("Der opstod en fejl under registrering");
       console.error("Signup error:", error);
