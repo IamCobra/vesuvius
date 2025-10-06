@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json({
-      message: "Bruger oprettet succesfuldt",
+      message: "Konto oprettet succesfuldt! Du kan nu logge ind.",
       user: userWithoutPassword, // Bruger info uden password
     });
   } catch (error) {

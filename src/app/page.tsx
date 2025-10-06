@@ -1,5 +1,6 @@
 import Footer from "@/app/components/footer";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -65,12 +66,12 @@ export default function Home() {
                 moderne innovation for at bringe jer de mest autentiske
                 smagsoplevelser direkte fra Italien til Odense.
               </p>
-              <a
+              <Link
                 href="/contact"
                 className="inline-block bg-burgundy-primary hover:bg-burgundy-dark text-burgundy-light px-8 py-3 rounded-lg font-semibold transition-colors duration-300"
               >
                 Kontakt Os
-              </a>
+              </Link>
             </div>
             <div className="relative">
               <div className="bg-white border-2 border-burgundy-primary w-full h-64 sm:h-80 lg:h-96 rounded-lg flex items-center justify-center">
