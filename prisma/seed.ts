@@ -11,12 +11,10 @@ async function main() {
   await prisma.reservedTable.deleteMany();
   await prisma.reservation.deleteMany();
   await prisma.customer.deleteMany();
-  await prisma.timeSlot.deleteMany();
   await prisma.diningTable.deleteMany();
   await prisma.menuItemVariant.deleteMany();
   await prisma.menuItem.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.employees.deleteMany();
   await prisma.roles.deleteMany();
   console.log("Data cleared successfully");
 
@@ -309,56 +307,19 @@ async function main() {
 
   console.log("Menu items created:", menuItems.length);
 
-  // Create time slots for all-day service (11:00 - 21:30, every 15 minutes)
-  const timeSlots = [];
-  const startHour = 11;
-  const endHour = 21;
-  const endMinutes = 30;
-
-  for (let hour = startHour; hour <= endHour; hour++) {
-    const maxMinutes = hour === endHour ? endMinutes : 45;
-    for (let minute = 0; minute <= maxMinutes; minute += 15) {
-      const startTime = `${String(hour).padStart(2, "0")}:${String(
-        minute
-      ).padStart(2, "0")}`;
-      const endHour = hour + 2; // 2-hour dining window
-      const endTime = `${String(endHour).padStart(2, "0")}:${String(
-        minute
-      ).padStart(2, "0")}`;
-
-      const slot = await prisma.timeSlot.create({
-        data: { startTime, endTime, maxTables: 10 },
-      });
-      timeSlots.push(slot);
-    }
-  }
-
-  console.log("Time slots created:", timeSlots.length);
-
-  // Create dining tables - 25 x 2-person tables that can be combined
   const diningTables = [];
-
-  // Table configuration for flexible seating:
-  // 25 x 2-tops (tables 1-25) - All tables are 2-person, combine as needed
-  // This gives us 50 total seats with maximum flexibility
-  // - 1-2 people: Use 1 table
-  // - 3-4 people: Combine 2 tables
-  // - 5-6 people: Combine 3 tables
-  // - 7-8 people: Combine 4 tables
-  // - 9+ people: Combine 5+ tables (up to restaurant policy limit)
 
   for (let i = 1; i <= 25; i++) {
     const table = await prisma.diningTable.create({
       data: {
         tableNumber: i,
-        seats: 2, // All tables are 2-person
+        seats: 2,
       },
     });
     diningTables.push(table);
   }
   console.log("Dining tables created:", diningTables.length);
 
-  // Create customers (based on your Resevators data)
   const customers = await Promise.all([
     prisma.customer.create({
       data: {

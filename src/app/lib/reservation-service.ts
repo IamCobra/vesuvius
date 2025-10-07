@@ -77,8 +77,7 @@ class ReservationService {
     const diningMinutes = 120;
 
     try {
-      return await prisma.$transaction(
-        async (tx) => {
+      return await prisma.$transaction(async (tx) => {
           // Find available tables
           // Find available tables within the transaction
           const slotEnd = new Date(
@@ -175,25 +174,9 @@ class ReservationService {
               tableNumber: table.tableNumber,
             })),
           };
-        },
-        {
-          isolationLevel: "Serializable", // Highest isolation level for consistency
         }
       );
     } catch (error: unknown) {
-      // Handle PostgreSQL exclusion constraint violation
-      if (
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === "23P01"
-      ) {
-        return {
-          success: false,
-          message: "Table booking conflict - please try another time slot",
-        };
-      }
-
       return {
         success: false,
         message: "Failed to create reservation. Please try again.",

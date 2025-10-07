@@ -55,15 +55,8 @@ export async function GET() {
       })),
     }));
 
-    return NextResponse.json({ 
-      success: true, 
-      orders: transformedOrders 
-    });
+    return NextResponse.json({ success: true, orders: transformedOrders });
   } catch (error) {
-    console.error("Error fetching kitchen orders:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: "Failed to fetch orders" 
-    }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }

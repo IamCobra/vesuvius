@@ -91,16 +91,9 @@ export async function GET(request: NextRequest) {
       })),
     }));
 
-    return NextResponse.json({
-      success: true,
-      orders: transformedOrders,
-    });
+    return NextResponse.json({ success: true, orders: transformedOrders });
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch orders" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
   }
 }
 
@@ -198,15 +191,8 @@ export async function POST(request: NextRequest) {
       })),
     };
 
-    return NextResponse.json({
-      success: true,
-      order: transformedOrder,
-    });
+    return NextResponse.json({ success: true, order: transformedOrder });
   } catch (error) {
-    console.error("Error creating order:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
   }
 }
