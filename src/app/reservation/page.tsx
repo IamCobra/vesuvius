@@ -657,7 +657,7 @@ export default function Reservation() {
                   {/* Phone */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Telefonnummer 
+                      Telefonnummer
                       <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md ml-2">
                         Optional
                       </span>
