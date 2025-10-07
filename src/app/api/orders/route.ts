@@ -71,9 +71,17 @@ export async function GET(request: NextRequest) {
     // Transform data for mobile apps (matching old format)
     const transformedOrders = orders.map((order) => ({
       id: order.id,
-      tableNumber: order.tableNumber || order.reservation?.reserved[0]?.table.tableNumber || 0,
-      tableName: order.tableNumber?.toString() || order.reservation?.reserved[0]?.table.tableNumber?.toString() || "Unknown",
-      customer: order.customer ? `${order.customer.firstName} ${order.customer.lastName}` : "Walk-in",
+      tableNumber:
+        order.tableNumber ||
+        order.reservation?.reserved[0]?.table.tableNumber ||
+        0,
+      tableName:
+        order.tableNumber?.toString() ||
+        order.reservation?.reserved[0]?.table.tableNumber?.toString() ||
+        "Unknown",
+      customer: order.customer
+        ? `${order.customer.firstName} ${order.customer.lastName}`
+        : "Walk-in",
       status: order.status,
       total: Number(order.totalPrice),
       createdAt: order.createdAt.toISOString(),
@@ -84,7 +92,9 @@ export async function GET(request: NextRequest) {
         quantity: item.quantity,
         qty: item.quantity, // For mobile app compatibility
         price: Number(item.unitPrice),
-        notes: item.customizations ? JSON.stringify(item.customizations) : undefined,
+        notes: item.customizations
+          ? JSON.stringify(item.customizations)
+          : undefined,
         menuItem: {
           name: item.menuItem.name,
         },
@@ -93,7 +103,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, orders: transformedOrders });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch orders" },
+      { status: 500 }
+    );
   }
 }
 
@@ -173,7 +186,9 @@ export async function POST(request: NextRequest) {
       id: order.id,
       tableNumber: order.tableNumber,
       tableName: order.tableNumber?.toString() || "Unknown",
-      customer: order.customer ? `${order.customer.firstName} ${order.customer.lastName}` : "Walk-in",
+      customer: order.customer
+        ? `${order.customer.firstName} ${order.customer.lastName}`
+        : "Walk-in",
       status: order.status,
       total: Number(order.totalPrice),
       createdAt: order.createdAt.toISOString(),
@@ -184,7 +199,9 @@ export async function POST(request: NextRequest) {
         quantity: item.quantity,
         qty: item.quantity,
         price: Number(item.unitPrice),
-        notes: item.customizations ? JSON.stringify(item.customizations) : undefined,
+        notes: item.customizations
+          ? JSON.stringify(item.customizations)
+          : undefined,
         menuItem: {
           name: item.menuItem.name,
         },
@@ -193,6 +210,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, order: transformedOrder });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create order" },
+      { status: 500 }
+    );
   }
 }

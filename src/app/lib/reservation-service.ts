@@ -78,104 +78,102 @@ class ReservationService {
 
     try {
       return await prisma.$transaction(async (tx) => {
-          // Find available tables
-          // Find available tables within the transaction
-          const slotEnd = new Date(
-            request.slotStart.getTime() + diningMinutes * 60 * 1000
-          );
+        // Find available tables
+        // Find available tables within the transaction
+        const slotEnd = new Date(
+          request.slotStart.getTime() + diningMinutes * 60 * 1000
+        );
 
-          const availableTables = await tx.diningTable.findMany({
-            where: {
-              NOT: {
-                reserved: {
-                  some: {
-                    AND: [
-                      { startUtc: { lt: slotEnd } },
-                      { endUtc: { gt: request.slotStart } },
-                    ],
-                  },
+        const availableTables = await tx.diningTable.findMany({
+          where: {
+            NOT: {
+              reserved: {
+                some: {
+                  AND: [
+                    { startUtc: { lt: slotEnd } },
+                    { endUtc: { gt: request.slotStart } },
+                  ],
                 },
               },
             },
-            orderBy: [{ seats: "asc" }, { tableNumber: "asc" }],
-          });
+          },
+          orderBy: [{ seats: "asc" }, { tableNumber: "asc" }],
+        });
 
-          // Apply table selection logic - calculate how many tables we need
-          const tablesNeeded = Math.ceil(request.partySize / 2);
+        // Apply table selection logic - calculate how many tables we need
+        const tablesNeeded = Math.ceil(request.partySize / 2);
 
-          if (availableTables.length < tablesNeeded) {
-            return {
-              success: false,
-              message:
-                "Not enough tables available for the requested party size",
-            };
-          }
-
-          // Select the required number of tables
-          const selectedTables = availableTables.slice(0, tablesNeeded);
-
-          // Create or get customer
-          let customerId = request.customerId;
-          if (!customerId && request.customerData) {
-            // Try to find existing customer first
-            const existingCustomer = await tx.customer.findUnique({
-              where: { email: request.customerData.email },
-            });
-
-            if (existingCustomer) {
-              customerId = existingCustomer.id;
-            } else {
-              const customer = await tx.customer.create({
-                data: request.customerData,
-              });
-              customerId = customer.id;
-            }
-          }
-
-          if (!customerId) {
-            return {
-              success: false,
-              message: "Customer information is required",
-            };
-          }
-
-          // Create reservation
-          const reservation = await tx.reservation.create({
-            data: {
-              partySize: request.partySize,
-              slotStartUtc: request.slotStart,
-              slotEndUtc: slotEnd,
-              customerId: customerId,
-              status: "CONFIRMED",
-            },
-          });
-
-          // Create reserved table entries with time overlap protection
-          await Promise.all(
-            selectedTables.map((table) =>
-              tx.reservedTable.create({
-                data: {
-                  reservationId: reservation.id,
-                  tableId: table.id,
-                  startUtc: request.slotStart,
-                  endUtc: slotEnd,
-                },
-              })
-            )
-          );
-
+        if (availableTables.length < tablesNeeded) {
           return {
-            success: true,
-            reservationId: reservation.id,
-            message: `Reservation confirmed for ${request.partySize} guests`,
-            tables: selectedTables.map((table) => ({
-              tableId: table.id,
-              seats: table.seats,
-              tableNumber: table.tableNumber,
-            })),
+            success: false,
+            message: "Not enough tables available for the requested party size",
           };
         }
-      );
+
+        // Select the required number of tables
+        const selectedTables = availableTables.slice(0, tablesNeeded);
+
+        // Create or get customer
+        let customerId = request.customerId;
+        if (!customerId && request.customerData) {
+          // Try to find existing customer first
+          const existingCustomer = await tx.customer.findUnique({
+            where: { email: request.customerData.email },
+          });
+
+          if (existingCustomer) {
+            customerId = existingCustomer.id;
+          } else {
+            const customer = await tx.customer.create({
+              data: request.customerData,
+            });
+            customerId = customer.id;
+          }
+        }
+
+        if (!customerId) {
+          return {
+            success: false,
+            message: "Customer information is required",
+          };
+        }
+
+        // Create reservation
+        const reservation = await tx.reservation.create({
+          data: {
+            partySize: request.partySize,
+            slotStartUtc: request.slotStart,
+            slotEndUtc: slotEnd,
+            customerId: customerId,
+            status: "CONFIRMED",
+          },
+        });
+
+        // Create reserved table entries with time overlap protection
+        await Promise.all(
+          selectedTables.map((table) =>
+            tx.reservedTable.create({
+              data: {
+                reservationId: reservation.id,
+                tableId: table.id,
+                startUtc: request.slotStart,
+                endUtc: slotEnd,
+              },
+            })
+          )
+        );
+
+        return {
+          success: true,
+          reservationId: reservation.id,
+          message: `Reservation confirmed for ${request.partySize} guests`,
+          tables: selectedTables.map((table) => ({
+            tableId: table.id,
+            seats: table.seats,
+            tableNumber: table.tableNumber,
+          })),
+        };
+      });
     } catch (error: unknown) {
       return {
         success: false,

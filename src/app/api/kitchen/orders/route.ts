@@ -12,8 +12,8 @@ export async function GET() {
       },
       include: {
         items: {
-          include: { 
-            menuItem: true 
+          include: {
+            menuItem: true,
           },
         },
         customer: true,
@@ -27,17 +27,27 @@ export async function GET() {
           },
         },
       },
-      orderBy: { 
-        createdAt: "asc" // Oldest orders first for kitchen
+      orderBy: {
+        createdAt: "asc", // Oldest orders first for kitchen
       },
     });
 
     // Transform for kitchen app compatibility
     const transformedOrders = orders.map((order) => ({
       id: order.id,
-      tableNumber: order.tableNumber || order.reservation?.reserved[0]?.table.tableNumber || 0,
-      tableName: order.tableNumber?.toString() || order.reservation?.reserved[0]?.table.tableNumber?.toString() || "Unknown",
-      table: `Bord ${order.tableNumber || order.reservation?.reserved[0]?.table.tableNumber || "Ukendt"}`,
+      tableNumber:
+        order.tableNumber ||
+        order.reservation?.reserved[0]?.table.tableNumber ||
+        0,
+      tableName:
+        order.tableNumber?.toString() ||
+        order.reservation?.reserved[0]?.table.tableNumber?.toString() ||
+        "Unknown",
+      table: `Bord ${
+        order.tableNumber ||
+        order.reservation?.reserved[0]?.table.tableNumber ||
+        "Ukendt"
+      }`,
       status: order.status,
       total: Number(order.totalPrice),
       createdAt: order.createdAt.toISOString(),
@@ -48,7 +58,9 @@ export async function GET() {
         quantity: item.quantity,
         qty: item.quantity,
         price: Number(item.unitPrice),
-        notes: item.customizations ? JSON.stringify(item.customizations) : undefined,
+        notes: item.customizations
+          ? JSON.stringify(item.customizations)
+          : undefined,
         menuItem: {
           name: item.menuItem.name,
         },
@@ -57,6 +69,9 @@ export async function GET() {
 
     return NextResponse.json({ success: true, orders: transformedOrders });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch orders" },
+      { status: 500 }
+    );
   }
 }
