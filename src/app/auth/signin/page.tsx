@@ -27,7 +27,7 @@ export default function SignIn() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    setSuccessMessage(""); // Clear success message when attempting login
+    setSuccessMessage(""); 
 
     try {
       const result = await signIn("credentials", {

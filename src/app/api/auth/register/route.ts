@@ -104,13 +104,24 @@ export async function POST(request: NextRequest) {
     // Tallet 12 er "salt rounds" - hvor mange gange krypteringen køres
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Find or create USER role
+    let userRole = await prisma.roles.findFirst({
+      where: { roleName: "USER" }
+    });
+
+    if (!userRole) {
+      userRole = await prisma.roles.create({
+        data: { roleName: "USER" }
+      });
+    }
+
     // 💾 OPRET BRUGER I DATABASE
     const user = await prisma.user.create({
       data: {
         name: name, // Brugerens fulde navn
         email: email, // Email adresse (unique)
         password: hashedPassword, // Krypteret password
-        role: "USER", // Standard rolle for nye brugere
+        roleID: userRole.id, // Standard rolle for nye brugere
       },
     });
 

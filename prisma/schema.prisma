@@ -63,7 +63,7 @@ model Roles {
   employees   Employees[]
 }
 
-// Simple rate limiting
+// ratelimiting
 model LoginAttempt {
   id        String   @id @default(cuid())
   ipAddress String
@@ -117,7 +117,7 @@ model MenuItem {
 
 model MenuItemVariant {
   id          String  @id @default(cuid())
-  name        String // "Dobbelt", "Vegetarbøf", etc.
+  name        String // "Dobbelt", "Vegetarbøf" osv.
   priceChange Decimal @db.Decimal(10, 2) // +26 for dobbelt, +0 for vegetar
 
   menuItemId String
@@ -129,13 +129,13 @@ model MenuItemVariant {
   @@map("menu_item_variants")
 }
 
-// Enhanced Customer Management
+
 model Customer {
   id           String        @id @default(cuid())
   firstName    String
   lastName     String
   email        String        @unique
-  phone        String? // Converted from INT to String for better phone handling
+  phone        String? // Konvertert fra INT til String for bedre telefonhåndtering
   reservations Reservation[]
   orders       Order[]
   createdAt    DateTime      @default(now())

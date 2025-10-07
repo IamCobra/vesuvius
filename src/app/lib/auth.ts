@@ -64,6 +64,9 @@ export const authOptions: NextAuthOptions = {
           where: {
             email: credentials.email,
           },
+          include: {
+            role: true, // Include role information
+          },
         });
 
         if (!user) {
@@ -89,7 +92,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role, // ADMIN, USER, WAITER, eller KITCHEN
+          role: user.role.roleName, // Return role name as string
         };
       },
     }),
@@ -144,6 +147,9 @@ export const authOptions: NextAuthOptions = {
         // Det her beskytter mod slettede konti der stadig har gyldige tokens
         const existingUser = await prisma.user.findUnique({
           where: { id: token.sub },
+          include: {
+            role: true, // Include role information
+          },
         });
 
         // Hvis brugeren er slettet, log dem ud automatisk
@@ -153,7 +159,7 @@ export const authOptions: NextAuthOptions = {
 
         // Bruger eksisterer - opdater session med frisk data
         session.user.id = token.sub;
-        session.user.role = existingUser.role; // Rolle fra database (ikke token)
+        session.user.role = existingUser.role.roleName; // Rolle fra database (ikke token)
       }
       return session;
     },
