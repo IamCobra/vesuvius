@@ -532,7 +532,7 @@ export default function Reservation() {
 
                         {isCheckingAvailability && (
                           <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-200">
-                            🔍 Tjekker ledige tider...
+                            Checking available times...
                           </div>
                         )}
 

@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
-// GET: fetch all menu items
 export async function GET() {
   try {
     const items = await prisma.menuItem.findMany({

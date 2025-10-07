@@ -113,13 +113,13 @@ export default function AdminDashboard() {
   };
   const fetchMenu = async () => {
     try {
-      // henter alle menu items inkl dem der er disabled
-      const res = await fetch("/api/menu/items?admin=true");
-      if (!res.ok) throw new Error();
-      const j = await res.json();
-      setMenu(j.items || []);
-    } catch (err) {
-      console.error(err);
+      const response = await fetch("/api/admin/menu");
+      if (response.ok) {
+        const data = await response.json();
+        setMenu(data);
+      }
+    } catch (error) {
+      console.error("Error fetching menu:", error);
     }
   };
 
@@ -391,7 +391,6 @@ function AddMenuModal({ onClose }: { onClose: () => void }) {
 
   async function submit() {
     if (!name) return alert("Indtast navn");
-    // skulle måske validere pris og kategori også men lad os bare sende det
     await fetch("/api/menu/items", {
       method: "POST",
       headers: { "content-type": "application/json" },

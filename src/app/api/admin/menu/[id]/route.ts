@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
-// opdater menu item´
 export async function PUT(
   request: Request,
   context: { params: Promise<{ id: string }> }

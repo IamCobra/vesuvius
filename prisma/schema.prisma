@@ -208,21 +208,21 @@ model ReservedTable {
   table   DiningTable @relation(fields: [tableId], references: [id])
 
   @@unique([reservationId, tableId])
-  // NOTE: the "no overlap" rule is added via a raw SQL migration (exclusion constraint)
+  
   @@map("reserved_tables")
 }
 
 // Order Management (from your SQL)
 model Order {
   id            String       @id @default(cuid())
-  reservationId String? // Optional - some orders might not be tied to reservations
+  reservationId String?
   reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  customerId    String? // Direct customer link for walk-ins
+  customerId    String? // hvis man vader ind i løbet af dagen
   customer      Customer?    @relation(fields: [customerId], references: [id])
-  tableNumber   Int? // For walk-in customers
+  tableNumber   Int? // igen hvis kunderne kommer vadende ind
   status        OrderStatus  @default(ORDERED)
   totalPrice    Decimal      @default(0) @db.Decimal(10, 2)
-  notes         String? // Special requests
+  notes         String? // speciale ønsker
 
   items OrderItem[]
 

@@ -15,7 +15,6 @@ export default function SignIn() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Tjek om brugeren kommer fra signup
     if (searchParams.get("message") === "account-created") {
       setSuccessMessage(
         "Konto oprettet! Du kan nu logge ind med dit email og password."
@@ -41,7 +40,6 @@ export default function SignIn() {
         return;
       }
 
-      // Refresh session og redirect
       await getSession();
       router.push("/");
       router.refresh();
