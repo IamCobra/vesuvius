@@ -1,20 +1,30 @@
 -- CreateTable
-CREATE TABLE "public"."employees" (
-    "id" TEXT NOT NULL,
-    "userName" VARCHAR(20) NOT NULL,
-    "password" VARCHAR(80) NOT NULL,
-    "roleId" TEXT NOT NULL,
-
-    CONSTRAINT "employees_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."roles" (
+CREATE TABLE "roles" (
     "id" TEXT NOT NULL,
     "roleName" TEXT NOT NULL,
 
     CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "employees" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "position" TEXT NOT NULL,
+    "salary" DOUBLE PRECISION,
+
+    CONSTRAINT "employees_pkey" PRIMARY KEY ("id")
+);
+
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "roleId" TEXT;
+
+-- CreateIndex
+CREATE UNIQUE INDEX "roles_roleName_key" ON "roles"("roleName");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "employees_email_key" ON "employees"("email");
+
 -- AddForeignKey
-ALTER TABLE "public"."employees" ADD CONSTRAINT "employees_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "public"."roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "roles"("id") ON DELETE SET NULL ON UPDATE CASCADE;

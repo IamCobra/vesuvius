@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    let userRole = await prisma.roles.findFirst({
+    // Find or create default USER role
+    let userRole = await prisma.roles.findUnique({
       where: { roleName: "USER" },
     });
 
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
         name: name,
         email: email,
         password: hashedPassword,
-        roleID: userRole.id,
+        roleId: userRole.id,
       },
     });
 

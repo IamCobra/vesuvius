@@ -519,7 +519,7 @@ export default function Reservation() {
                                   {time}
                                   {isLateTime && isAvailable && (
                                     <span className="ml-1 text-xs text-yellow-600">
-                                      ⚠
+                                      (Sen)
                                     </span>
                                   )}
                                   {!isAvailable && (
@@ -541,7 +541,7 @@ export default function Reservation() {
                           LATE_TIME_SLOTS.includes(time)
                         ) && (
                           <div className="mt-2 text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                            ⚠️ <strong>OBS:</strong> Tider efter 20:15 er tæt på
+                            <strong>OBS:</strong> Tider efter 20:15 er tæt på
                             lukketid (22:00). Restauranten lukker kl. 22:00.
                           </div>
                         )}
