@@ -61,6 +61,8 @@ model Roles {
   roleName    String
   user        User[]
   employees   Employees[]
+
+  @@map("roles")
 }
 
 // ratelimiting
@@ -258,6 +260,8 @@ model Employees {
   password String @db.VarChar(80)
   role Roles @relation(fields: [roleId], references: [id])
   roleId String
+
+  @@map("employees")
 }
 
 

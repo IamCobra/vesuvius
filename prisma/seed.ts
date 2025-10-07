@@ -615,7 +615,8 @@ async function main() {
       data:[
         {roleName: 'ADMIN'},
         {roleName: 'COOK'},
-        {roleName: 'WAITER'}
+        {roleName: 'WAITER'},
+        {roleName: 'USER'}
       ]
     })
   ])
