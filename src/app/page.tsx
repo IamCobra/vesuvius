@@ -32,18 +32,18 @@ export default function Home() {
             retter lavet af friske, lokale ingredienser.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a
+            <Link
               href="/menu"
               className="w-full sm:w-auto bg-burgundy-primary hover:bg-burgundy-dark text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
             >
               Se Vores Menu
-            </a>
-            <a
+            </Link>
+            <Link
               href="/reservation"
               className="w-full sm:w-auto bg-white hover:bg-gray-100 text-burgundy-primary px-8 py-4 rounded-lg font-semibold text-lg border-2 border-white transition-all duration-300 transform hover:scale-105 shadow-lg text-center"
             >
               Reserver nu
-            </a>
+            </Link>
           </div>
         </div>
       </section>
