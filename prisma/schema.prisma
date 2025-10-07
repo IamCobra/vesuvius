@@ -45,13 +45,21 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String // For credentials auth
-  role          UserRole  @default(USER)
+  role          Roles @relation(fields: [roleID], references: [id])
+  roleID        String
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   @@map("users")
+}
+
+//User roles
+model Roles {
+  id          String @id @default(cuid())
+  roleName    String
+  user        User[]
 }
 
 // Simple rate limiting
@@ -73,13 +81,6 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verificationtokens")
-}
-
-enum UserRole {
-  USER
-  ADMIN
-  WAITER
-  KITCHEN
 }
 
 model Category {
@@ -248,21 +249,6 @@ model OrderItem {
 
   @@map("order_items")
 }
-
-//eployees and employee roles
-model Employees {
-  id String @id @default(cuid())
-  userName String @db.VarChar(20)
-  pssword String @db.VarChar(80)
-  role Roles @relation(fields: [roleId], references: [id])
-  roleId String
-}
-model Roles {
-  id String @id @default(cuid())
-  roleName String
-  employees Employees[]
-}
-
 
 model OpeningHour {
   id        String   @id @default(cuid())
