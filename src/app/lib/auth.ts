@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const ipAddress = getClientIP(req as any);
+        const ipAddress = getClientIP(req as Request);
         const rateLimitOk = await checkRateLimit(ipAddress);
         if (!rateLimitOk) {
           return null;
