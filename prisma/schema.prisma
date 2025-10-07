@@ -39,30 +39,37 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String // For credentials auth
-  role          Roles @relation(fields: [roleID], references: [id])
-  roleID        String
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  roleId    String?
+  role      Roles?   @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
 
   @@map("users")
 }
 
-//User roles
 model Roles {
-  id          String @id @default(cuid())
-  roleName    String
-  user        User[]
-  employees   Employees[]
+  id       String @id @default(cuid())
+  roleName String @unique
+  users    User[]
 
   @@map("roles")
+}
+
+model Employees {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  position String
+  salary   Float?
+
+  @@map("employees")
 }
 
 // ratelimiting
@@ -252,19 +259,6 @@ model OrderItem {
 
   @@map("order_items")
 }
-
-//Employees and employee roles
-model Employees {
-  id String @id @default(cuid())
-  userName String @db.VarChar(20)
-  password String @db.VarChar(80)
-  role Roles @relation(fields: [roleId], references: [id])
-  roleId String
-
-  @@map("employees")
-}
-
-
 
 model OpeningHour {
   id        String   @id @default(cuid())
