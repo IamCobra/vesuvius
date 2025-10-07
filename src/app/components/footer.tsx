@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { RESTAURANT_INFO, OPENING_HOURS, QUICK_LINKS } from "@/app/constants/restaurant";
-import { LocationIcon, PhoneIcon, EmailIcon, SocialIcon } from "./icons";
+import {
+  RESTAURANT_INFO,
+  OPENING_HOURS,
+  QUICK_LINKS,
+} from "@/app/constants/restaurant";
+import { LocationIcon, PhoneIcon, EmailIcon, socialIcon } from "./icons";
 
 export default function Footer() {
   return (
@@ -18,12 +22,12 @@ export default function Footer() {
                   <p>{RESTAURANT_INFO.address.city}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <PhoneIcon />
                 <p>{RESTAURANT_INFO.contact.phone}</p>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <EmailIcon />
                 <p>{RESTAURANT_INFO.contact.email}</p>
@@ -65,9 +69,11 @@ export default function Footer() {
 
             {/* Social Media Icons */}
             <div className="flex space-x-4">
-              {Object.entries(RESTAURANT_INFO.social).map(([platform, href]) => (
-                <SocialIcon key={platform} platform={platform} href={href} />
-              ))}
+              {Object.entries(RESTAURANT_INFO.social).map(
+                ([platform, href]) => (
+                  <socialIcon key={platform} platform={platform} href={href} />
+                )
+              )}
             </div>
           </div>
         </div>

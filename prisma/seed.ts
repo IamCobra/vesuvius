@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  // Clear existing data in correct order to handle foreign key constraints
+  
   console.log("Clearing existing data...");
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -21,7 +21,7 @@ async function main() {
   await prisma.roles.deleteMany();
   console.log("Data cleared successfully");
 
-  // Create categories
+  
   const categories = await Promise.all([
     prisma.category.create({
       data: {
@@ -52,9 +52,9 @@ async function main() {
 
   console.log("Categories created:", categories.length);
 
-  // Create menu items based on Vesuvius actual menu
+  
   const menuItems = await Promise.all([
-    // Appetizers & Salater
+    
     prisma.menuItem.create({
       data: {
         name: "Nachos Supreme",

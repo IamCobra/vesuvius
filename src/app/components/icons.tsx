@@ -76,7 +76,6 @@ function ClockIcon({ className = "w-6 h-6" }: IconProps) {
   );
 }
 
-// Feature Icon Component with dynamic mapping
 export function FeatureIcon({
   feature,
   className = "w-8 h-8 text-orange-600",
@@ -136,7 +135,7 @@ export function FeatureIcon({
 }
 
 // Social Icon Component with platform mapping
-export function SocialIcon({
+export function socialIcon({
   platform,
   href,
   className = "w-5 h-5",

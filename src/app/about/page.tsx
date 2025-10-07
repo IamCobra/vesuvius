@@ -33,7 +33,7 @@ export default function AboutPage() {
         unikke. Uanset om du spiser hos os eller bestiller ud, lover vi en
         lækker oplevelse hver gang.
       </p>
-      <div className="bg-burgundy-light rounded-lg p-6 shadow text-center">
+      <div className="bg-burgundy-light rounded-lg p-6 shadow text-center mb-6">
         <h2 className="text-2xl font-semibold mb-2 text-burgundy-primary">
           Vores historie
         </h2>
@@ -42,6 +42,26 @@ export default function AboutPage() {
           af Napoli til dit bord. Vores kokke bruger traditionelle opskrifter og
           lokale råvarer til at lave hver ret med omhu.
         </p>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 shadow">
+        <h2 className="text-2xl font-semibold mb-4 text-blue-800 text-center">
+          Praktisk information
+        </h2>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+            <span className="font-medium text-gray-700">Spisetid ved reservation:</span>
+            <span className="text-blue-600 font-semibold">2 timer</span>
+          </div>
+          <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+            <span className="font-medium text-gray-700">Åbningstider:</span>
+            <span className="text-gray-600">16:00 - 22:00</span>
+          </div>
+          <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+            <span className="font-medium text-gray-700">Bordtype:</span>
+            <span className="text-gray-600">2-4-6-8 personer</span>
+          </div>
+        </div>
       </div>
 
       <BackButton className="mt-6 px-4 py-2 bg-burgundy-primary rounded hover:bg-burgundy-dark" />

@@ -398,9 +398,15 @@ export default function Reservation() {
             <div className="p-6">
               {modalStep === 1 && (
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-burgundy-primary mb-4">
-                    Vælg dato, tid og antal gæster
-                  </h3>
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-burgundy-primary mb-2">
+                      Vælg dato, tid og antal gæster
+                    </h3>
+                    <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      Du vil have <strong>2 timer</strong> til dit besøg fra dit
+                      reserverede tidspunkt
+                    </p>
+                  </div>
 
                   {/* Number of Guests */}
                   <div>
@@ -556,16 +562,21 @@ export default function Reservation() {
 
                     {reservationData.time && (
                       <div
-                        className={`mt-2 text-sm p-2 rounded-lg border ${
+                        className={`mt-2 text-sm p-3 rounded-lg border ${
                           LATE_TIME_SLOTS.includes(reservationData.time)
                             ? "text-yellow-700 bg-yellow-50 border-yellow-200"
                             : "text-green-600 bg-green-50 border-green-200"
                         }`}
                       >
-                        ✓ Valgt tid: {reservationData.time}
+                        <div className="flex items-center gap-2">
+                          Valgt tid: {reservationData.time}
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                            2 timer
+                          </span>
+                        </div>
                         {LATE_TIME_SLOTS.includes(reservationData.time) && (
                           <span className="block mt-1 text-xs">
-                            ⚠️ Bemærk: Restauranten lukker kl. 22:00
+                            Bemærk: Restauranten lukker kl. 22:00
                           </span>
                         )}
                       </div>
@@ -599,6 +610,9 @@ export default function Reservation() {
                       {reservationData.guests}{" "}
                       {reservationData.guests === 1 ? "person" : "personer"} •{" "}
                       {reservationData.date} • {reservationData.time}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-2 font-medium">
+                      Spilletid: 2 timer fra {reservationData.time}
                     </p>
                   </div>
 
@@ -819,6 +833,15 @@ export default function Reservation() {
                             </span>
                           </div>
 
+                          <div className="flex justify-between items-center py-2 border-b border-burgundy-primary/20">
+                            <span className="font-medium text-gray-700">
+                              Spisetid:
+                            </span>
+                            <span className="text-blue-600 font-semibold">
+                              2 timer
+                            </span>
+                          </div>
+
                           <div className="flex justify-between items-center py-2">
                             <span className="font-medium text-gray-700">
                               Antal gæster:
@@ -851,6 +874,14 @@ export default function Reservation() {
                       </div>
                     </>
                   )}
+
+                  <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl text-sm text-blue-800 mb-4">
+                    <p className="font-semibold mb-1">Spisetid: 2 timer</p>
+                    <p>
+                      Dit bord er reserveret i 2 timer fra dit booket tidspunkt.
+                      Vi håber I får en fantastisk oplevelse hos os!
+                    </p>
+                  </div>
 
                   <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 mb-6">
                     <p className="mb-2">
