@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  
   console.log("Clearing existing data...");
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -21,7 +20,6 @@ async function main() {
   await prisma.roles.deleteMany();
   console.log("Data cleared successfully");
 
-  
   const categories = await Promise.all([
     prisma.category.create({
       data: {
@@ -52,9 +50,7 @@ async function main() {
 
   console.log("Categories created:", categories.length);
 
-  
   const menuItems = await Promise.all([
-    
     prisma.menuItem.create({
       data: {
         name: "Nachos Supreme",
@@ -612,14 +608,14 @@ async function main() {
 
   await Promise.all([
     prisma.roles.createMany({
-      data:[
-        {roleName: 'ADMIN'},
-        {roleName: 'COOK'},
-        {roleName: 'WAITER'},
-        {roleName: 'USER'}
-      ]
-    })
-  ])
+      data: [
+        { roleName: "ADMIN" },
+        { roleName: "COOK" },
+        { roleName: "WAITER" },
+        { roleName: "USER" },
+      ],
+    }),
+  ]);
 
   console.log("Database seeding completed successfully!");
 }
