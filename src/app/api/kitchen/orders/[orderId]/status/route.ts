@@ -33,7 +33,15 @@ export async function PATCH(
         break;
       default:
         // Use the status as-is if it's already in database format
-        if (!["ORDERED", "IN_PREPARATION", "READY", "COMPLETED", "CANCELLED"].includes(status)) {
+        if (
+          ![
+            "ORDERED",
+            "IN_PREPARATION",
+            "READY",
+            "COMPLETED",
+            "CANCELLED",
+          ].includes(status)
+        ) {
           return NextResponse.json(
             { error: "Invalid status value" },
             { status: 400 }
@@ -72,7 +80,9 @@ export async function PATCH(
         quantity: item.quantity,
         qty: item.quantity,
         price: Number(item.unitPrice),
-        notes: item.customizations ? JSON.stringify(item.customizations) : undefined,
+        notes: item.customizations
+          ? JSON.stringify(item.customizations)
+          : undefined,
         menuItem: {
           name: item.menuItem.name,
         },

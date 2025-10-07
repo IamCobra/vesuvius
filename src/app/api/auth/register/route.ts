@@ -106,12 +106,12 @@ export async function POST(request: NextRequest) {
 
     // Find or create USER role
     let userRole = await prisma.roles.findFirst({
-      where: { roleName: "USER" }
+      where: { roleName: "USER" },
     });
 
     if (!userRole) {
       userRole = await prisma.roles.create({
-        data: { roleName: "USER" }
+        data: { roleName: "USER" },
       });
     }
 

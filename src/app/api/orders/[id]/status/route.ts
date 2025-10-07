@@ -18,7 +18,13 @@ export async function PATCH(
     }
 
     // Validate status values
-    const validStatuses = ["ORDERED", "IN_PREPARATION", "READY", "COMPLETED", "CANCELLED"];
+    const validStatuses = [
+      "ORDERED",
+      "IN_PREPARATION",
+      "READY",
+      "COMPLETED",
+      "CANCELLED",
+    ];
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { error: "Invalid status value" },
@@ -45,8 +51,8 @@ export async function PATCH(
       id: updatedOrder.id,
       tableNumber: updatedOrder.tableNumber,
       tableName: updatedOrder.tableNumber?.toString() || "Unknown",
-      customer: updatedOrder.customer 
-        ? `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}` 
+      customer: updatedOrder.customer
+        ? `${updatedOrder.customer.firstName} ${updatedOrder.customer.lastName}`
         : "Walk-in",
       status: updatedOrder.status,
       total: Number(updatedOrder.totalPrice),
@@ -58,7 +64,9 @@ export async function PATCH(
         quantity: item.quantity,
         qty: item.quantity,
         price: Number(item.unitPrice),
-        notes: item.customizations ? JSON.stringify(item.customizations) : undefined,
+        notes: item.customizations
+          ? JSON.stringify(item.customizations)
+          : undefined,
         menuItem: {
           name: item.menuItem.name,
         },

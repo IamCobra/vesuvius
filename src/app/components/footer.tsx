@@ -4,7 +4,12 @@ import {
   OPENING_HOURS,
   QUICK_LINKS,
 } from "@/app/constants/restaurant";
-import { LocationIcon, PhoneIcon, EmailIcon, socialIcon as SocialIcon } from "./icons";
+import {
+  LocationIcon,
+  PhoneIcon,
+  EmailIcon,
+  socialIcon as SocialIcon,
+} from "./icons";
 
 export default function Footer() {
   return (
