@@ -63,23 +63,8 @@ export default function SignUp() {
         return;
       }
 
-      // Auto-login efter registrering
-      const signInResult = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
-
-      if (signInResult?.error) {
-        setError(
-          "Konto oprettet, men login fejlede. Prøv at logge ind manuelt."
-        );
-        return;
-      }
-
-      // Redirect til forside
-      router.push("/");
-      router.refresh();
+      // Success! Redirect til login side
+      router.push("/auth/signin?message=account-created");
     } catch (error) {
       setError("Der opstod en fejl under registrering");
       console.error("Signup error:", error);
