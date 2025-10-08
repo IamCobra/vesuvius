@@ -29,7 +29,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
+
     setTimeout(() => {
       if (onSubmit) {
         onSubmit(formData);

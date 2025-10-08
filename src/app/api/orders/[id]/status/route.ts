@@ -17,7 +17,7 @@ export async function PATCH(
       );
     }
 
-    // Validate status values
+
     const validStatuses = [
       "ORDERED",
       "IN_PREPARATION",

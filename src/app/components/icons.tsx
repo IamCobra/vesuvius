@@ -1,6 +1,6 @@
 import React from "react";
 
-// SVG Icon Components
+
 type IconProps = {
   className?: string;
 };
@@ -134,7 +134,7 @@ export function FeatureIcon({
   return iconMap[feature] || iconMap["fresh-ingredients"];
 }
 
-// Social Icon Component with platform mapping
+
 export function socialIcon({
   platform,
   href,
@@ -163,7 +163,7 @@ export function socialIcon({
   );
 }
 
-// Contact Icon Component with dynamic mapping
+
 export function ContactIcon({
   type,
   className = "w-6 h-6",

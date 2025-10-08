@@ -29,7 +29,7 @@ export default function SignUp() {
     setIsLoading(true);
     setError("");
 
-    // Validering
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords matcher ikke");
       setIsLoading(false);
@@ -43,7 +43,7 @@ export default function SignUp() {
     }
 
     try {
-      // Opret bruger
+
       const registerResponse = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -63,7 +63,6 @@ export default function SignUp() {
         return;
       }
 
-      // Success! Redirect til login side
       router.push("/auth/signin?message=account-created");
     } catch (error) {
       setError("Der opstod en fejl under registrering");

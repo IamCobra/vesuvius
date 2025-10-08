@@ -415,16 +415,15 @@ async function main() {
   // hjælpe funktion til at oprette UTC datetime fra dato og tid
   function createUtcDateTime(date: Date, timeString: string): Date {
     const [hours, minutes] = timeString.split(":").map(Number);
-    // Create a date string in ISO format with the local time
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     const hoursStr = String(hours).padStart(2, "0");
     const minutesStr = String(minutes).padStart(2, "0");
 
-    // Parse as Europe/Copenhagen time and convert to UTC
     const localDateString = `${year}-${month}-${day}T${hoursStr}:${minutesStr}:00`;
-    // This assumes the server is configured with the correct timezone
+
     return new Date(localDateString);
   }
 

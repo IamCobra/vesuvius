@@ -1,4 +1,4 @@
-// Restaurant constants and configuration
+
 export const RESTAURANT_INFO = {
   name: "Vesuvius",
   address: {
@@ -14,7 +14,7 @@ export const RESTAURANT_INFO = {
     instagram: "#",
     twitter: "#",
   },
-  // Restaurant configuration
+
   tablesCount: 25,
   seatsPerTable: 2,
   totalCapacity: 50,
@@ -81,7 +81,7 @@ export const TIME_SLOTS = [
   "21:00",
 ];
 
-// Time slots that are close to closing (show warning)
+
 export const LATE_TIME_SLOTS = ["20:30", "20:45", "21:00"];
 
 export const CONTACT_DETAILS = [

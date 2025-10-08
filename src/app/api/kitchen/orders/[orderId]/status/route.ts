@@ -32,7 +32,7 @@ export async function PATCH(
         dbStatus = "CANCELLED";
         break;
       default:
-        // Use the status as-is if it's already in database format
+
         if (
           ![
             "ORDERED",

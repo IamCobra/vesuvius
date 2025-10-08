@@ -103,7 +103,7 @@ export default function Menu() {
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           onError={(e) => {
-                            // Hide the image container if it fails to load
+                            // hvis image container ikke kommer tilbage køres dette igennem
                             const target = e.target as HTMLImageElement;
                             if (target && target.parentElement) {
                               target.parentElement.style.display = "none";

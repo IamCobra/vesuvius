@@ -30,7 +30,7 @@ class ReservationService {
   ): Promise<TableAssignment[]> {
     const slotEnd = new Date(slotStart.getTime() + diningMinutes * 60 * 1000);
 
-    // Find tables NOT reserved during the requested time window
+    
     const availableTables = await prisma.diningTable.findMany({
       where: {
         NOT: {
@@ -47,13 +47,10 @@ class ReservationService {
       orderBy: [{ seats: "asc" }, { tableNumber: "asc" }],
     });
 
-    // Simplified 2-top combination strategy:
-    // All tables are 2-person, so we just combine as many as needed
 
-    // Calculate how many tables we need (round up for odd numbers)
     const tablesNeeded = Math.ceil(partySize / 2);
 
-    // Check if we have enough available tables
+
     if (availableTables.length >= tablesNeeded) {
       return availableTables.slice(0, tablesNeeded).map((table) => ({
         tableId: table.id,
@@ -62,12 +59,10 @@ class ReservationService {
       }));
     }
 
-    return []; // No availability
+    return []; 
   }
 
-  /**
-   * Create a reservation with proper table assignments using serializable transaction
-   */
+
   static async createReservation(request: ReservationRequest): Promise<{
     success: boolean;
     reservationId?: string;
@@ -78,8 +73,7 @@ class ReservationService {
 
     try {
       return await prisma.$transaction(async (tx) => {
-        // Find available tables
-        // Find available tables within the transaction
+
         const slotEnd = new Date(
           request.slotStart.getTime() + diningMinutes * 60 * 1000
         );
@@ -100,7 +94,7 @@ class ReservationService {
           orderBy: [{ seats: "asc" }, { tableNumber: "asc" }],
         });
 
-        // Apply table selection logic - calculate how many tables we need
+
         const tablesNeeded = Math.ceil(request.partySize / 2);
 
         if (availableTables.length < tablesNeeded) {
@@ -110,13 +104,13 @@ class ReservationService {
           };
         }
 
-        // Select the required number of tables
+
         const selectedTables = availableTables.slice(0, tablesNeeded);
 
-        // Create or get customer
+
         let customerId = request.customerId;
         if (!customerId && request.customerData) {
-          // Try to find existing customer first
+
           const existingCustomer = await tx.customer.findUnique({
             where: { email: request.customerData.email },
           });
@@ -138,7 +132,6 @@ class ReservationService {
           };
         }
 
-        // Create reservation
         const reservation = await tx.reservation.create({
           data: {
             partySize: request.partySize,
@@ -149,7 +142,6 @@ class ReservationService {
           },
         });
 
-        // Create reserved table entries with time overlap protection
         await Promise.all(
           selectedTables.map((table) =>
             tx.reservedTable.create({
@@ -182,12 +174,10 @@ class ReservationService {
     }
   }
 
-  /**
-   * Check capacity for a given time slot (for UI availability display)
-   */
+
   static async checkSlotCapacity(
     date: Date,
-    timeString: string // "18:00"
+    timeString: string 
   ): Promise<{
     availableSeats: number;
     totalSeats: number;
@@ -199,13 +189,13 @@ class ReservationService {
 
     const slotEnd = new Date(slotStart.getTime() + 120 * 60 * 1000); // 120 minutes
 
-    // Get total restaurant capacity
+
     const totalCapacityResult = await prisma.diningTable.aggregate({
       _sum: { seats: true },
     });
     const totalSeats = totalCapacityResult._sum.seats || 0;
 
-    // Get occupied seats during this time window
+
     const occupiedSeats = await prisma.reservedTable.findMany({
       where: {
         AND: [{ startUtc: { lt: slotEnd } }, { endUtc: { gt: slotStart } }],
