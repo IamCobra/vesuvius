@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Authentication Models (NextAuth.js)
+
 model Account {
   id                String  @id @default(cuid())
   userId            String

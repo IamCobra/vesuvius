@@ -405,14 +405,14 @@ async function main() {
 
   console.log("Customers created:", customers.length);
 
-  // Create sample reservations with UTC timestamps and 120-minute dwell time
+  // lave test reservations med UTC tidsstempler og 120 minutters opholdstid
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
   const dayAfter = new Date(today);
   dayAfter.setDate(today.getDate() + 2);
 
-  // Helper function to create UTC datetime from date and time
+  // hjælpe funktion til at oprette UTC datetime fra dato og tid
   function createUtcDateTime(date: Date, timeString: string): Date {
     const [hours, minutes] = timeString.split(":").map(Number);
     // Create a date string in ISO format with the local time
@@ -433,7 +433,7 @@ async function main() {
       data: {
         partySize: 2,
         slotStartUtc: createUtcDateTime(tomorrow, "18:00"),
-        slotEndUtc: createUtcDateTime(tomorrow, "20:00"), // 120 minutes later
+        slotEndUtc: createUtcDateTime(tomorrow, "20:00"), // 120 minuter
         customerId: customers[0].id,
         status: "CONFIRMED",
       },
@@ -442,7 +442,7 @@ async function main() {
       data: {
         partySize: 4,
         slotStartUtc: createUtcDateTime(tomorrow, "18:30"),
-        slotEndUtc: createUtcDateTime(tomorrow, "20:30"), // 120 minutes later
+        slotEndUtc: createUtcDateTime(tomorrow, "20:30"), // 120 minuter senere
         customerId: customers[1].id,
         status: "CONFIRMED",
       },
@@ -460,7 +460,7 @@ async function main() {
       data: {
         partySize: 6,
         slotStartUtc: createUtcDateTime(dayAfter, "19:30"),
-        slotEndUtc: createUtcDateTime(dayAfter, "21:30"), // 120 minutes later
+        slotEndUtc: createUtcDateTime(dayAfter, "21:30"),
         customerId: customers[3].id,
         status: "CONFIRMED",
       },
@@ -469,12 +469,12 @@ async function main() {
 
   console.log("Reservations created:", reservations.length);
 
-  // Create reserved tables (link reservations to tables with time ranges)
+  // reserveret borde
   await Promise.all([
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[0].id,
-        tableId: diningTables[0].id, // 2-top for party of 2
+        tableId: diningTables[0].id, // 2 top for party of 2
         startUtc: reservations[0].slotStartUtc,
         endUtc: reservations[0].slotEndUtc,
       },
@@ -482,7 +482,7 @@ async function main() {
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[1].id,
-        tableId: diningTables[16].id, // Table 17: 4-top for party of 4
+        tableId: diningTables[16].id,
         startUtc: reservations[1].slotStartUtc,
         endUtc: reservations[1].slotEndUtc,
       },
@@ -490,7 +490,7 @@ async function main() {
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[2].id,
-        tableId: diningTables[17].id, // Table 18: 4-top for party of 3
+        tableId: diningTables[17].id,
         startUtc: reservations[2].slotStartUtc,
         endUtc: reservations[2].slotEndUtc,
       },
@@ -498,7 +498,7 @@ async function main() {
     prisma.reservedTable.create({
       data: {
         reservationId: reservations[3].id,
-        tableId: diningTables[18].id, // Table 19: 6-top for party of 6
+        tableId: diningTables[18].id,
         startUtc: reservations[3].slotStartUtc,
         endUtc: reservations[3].slotEndUtc,
       },
@@ -507,7 +507,7 @@ async function main() {
 
   console.log("Reserved tables created");
 
-  // Create sample orders
+  // sample orderer
   const orders = await Promise.all([
     prisma.order.create({
       data: {
@@ -529,7 +529,7 @@ async function main() {
 
   console.log("Orders created:", orders.length);
 
-  // Create order items
+  // order items
   await Promise.all([
     prisma.orderItem.create({
       data: {
