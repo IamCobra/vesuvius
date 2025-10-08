@@ -7,22 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -39,17 +37,18 @@ model Session {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  roleId    String?
-  role      Roles?   @relation(fields: [roleId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  accounts Account[]
-  sessions Session[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  roleId        String?
+  accounts      Account[]
+  sessions      Session[]
+  role          Roles?    @relation(fields: [roleId], references: [id])
 
   @@map("users")
 }
@@ -72,15 +71,13 @@ model Employees {
   @@map("employees")
 }
 
-// ratelimiting
 model LoginAttempt {
-  id        String   @id @default(cuid())
-  ipAddress String
-  attempts  Int      @default(1)
+  id          String   @id @default(cuid())
+  ipAddress   String   @unique
+  attempts    Int      @default(1)
   lastAttempt DateTime @default(now())
-  resetTime DateTime
+  resetTime   DateTime
 
-  @@unique([ipAddress])
   @@map("login_attempts")
 }
 
@@ -96,176 +93,147 @@ model VerificationToken {
 model Category {
   id        String     @id @default(cuid())
   name      String     @unique
-  menuItems MenuItem[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  menuItems MenuItem[]
 
   @@map("categories")
 }
 
 model MenuItem {
-  id          String  @id @default(cuid())
+  id          String            @id @default(cuid())
   name        String
   description String
-  price       Decimal @db.Decimal(10, 2)
+  price       Decimal           @db.Decimal(10, 2)
   image       String?
-  available   Boolean @default(true)
-
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  variants   MenuItemVariant[]
-  orderItems OrderItem[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  available   Boolean           @default(true)
+  categoryId  String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  variants    MenuItemVariant[]
+  category    Category          @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
 
   @@unique([categoryId, name])
   @@map("menu_items")
 }
 
 model MenuItemVariant {
-  id          String  @id @default(cuid())
-  name        String // "Dobbelt", "Vegetarbøf" osv.
-  priceChange Decimal @db.Decimal(10, 2) // +26 for dobbelt, +0 for vegetar
-
-  menuItemId String
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  priceChange Decimal  @db.Decimal(10, 2)
+  menuItemId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 
   @@map("menu_item_variants")
 }
-
 
 model Customer {
   id           String        @id @default(cuid())
   firstName    String
   lastName     String
   email        String        @unique
-  phone        String? // Konvertert fra INT til String for bedre telefonhåndtering
-  reservations Reservation[]
-  orders       Order[]
+  phone        String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  orders       Order[]
+  reservations Reservation[]
 
   @@map("customers")
 }
 
-// Time Slot Management (kept for UI display, not used for reservations)
 model TimeSlot {
   id        String   @id @default(cuid())
-  startTime String // "17:00"
-  endTime   String // "19:00"
-  maxTables Int      @default(10) // Maximum available tables for this slot
+  startTime String
+  endTime   String
+  maxTables Int      @default(10)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("time_slots")
 }
 
-// Dining Table Management
 model DiningTable {
   id          String          @id @default(cuid())
   tableNumber Int             @unique
-  seats       Int             @default(4) // Number of seats per table (2, 4, 6, 8)
-  reserved    ReservedTable[]
+  seats       Int             @default(4)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+  reserved    ReservedTable[]
 
   @@map("dining_tables")
 }
 
-// Enhanced Reservations with rolling 120-minute window
 model Reservation {
   id           String            @id @default(cuid())
   partySize    Int
-  // Start of seating window (UTC). End is start + dwellMinutes (e.g. 120).
   slotStartUtc DateTime
-  slotEndUtc   DateTime // derived on create (slotStartUtc + 120 minutes)
+  slotEndUtc   DateTime
   customerId   String?
-  customer     Customer?         @relation(fields: [customerId], references: [id])
   status       ReservationStatus @default(CONFIRMED)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  orders       Order[]
+  customer     Customer?         @relation(fields: [customerId], references: [id])
   reserved     ReservedTable[]
-
-  // Relations from your SQL
-  orders Order[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([slotStartUtc])
   @@index([slotEndUtc])
   @@map("reservations")
 }
 
-// Junction table for reservations and tables with overlap prevention
 model ReservedTable {
-  id String @id @default(cuid())
-
-  // Duped onto this row so Postgres can enforce overlap per table:
-  startUtc DateTime
-  endUtc   DateTime
-
+  id            String      @id @default(cuid())
+  startUtc      DateTime
+  endUtc        DateTime
   reservationId String
+  tableId       String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-
-  tableId String
-  table   DiningTable @relation(fields: [tableId], references: [id])
+  table         DiningTable @relation(fields: [tableId], references: [id])
 
   @@unique([reservationId, tableId])
-  
   @@map("reserved_tables")
 }
 
-// Order Management (from your SQL)
 model Order {
   id            String       @id @default(cuid())
   reservationId String?
-  reservation   Reservation? @relation(fields: [reservationId], references: [id])
-  customerId    String? // hvis man vader ind i løbet af dagen
-  customer      Customer?    @relation(fields: [customerId], references: [id])
-  tableNumber   Int? // igen hvis kunderne kommer vadende ind
+  customerId    String?
+  tableNumber   Int?
   status        OrderStatus  @default(ORDERED)
   totalPrice    Decimal      @default(0) @db.Decimal(10, 2)
-  notes         String? // speciale ønsker
-
-  items OrderItem[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         OrderItem[]
+  customer      Customer?    @relation(fields: [customerId], references: [id])
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
 
   @@map("orders")
 }
 
-// Order Items (from your OrderedDishes)
 model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  unitPrice Decimal @db.Decimal(10, 2)
-
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  menuItemId String
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
-
-  // JSON for variants og tilvalg som "Dobbelt burger", "Ekstra ost"
+  id             String   @id @default(cuid())
+  quantity       Int
+  unitPrice      Decimal  @db.Decimal(10, 2)
+  orderId        String
+  menuItemId     String
   customizations Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  menuItem       MenuItem @relation(fields: [menuItemId], references: [id])
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("order_items")
 }
 
 model OpeningHour {
   id        String   @id @default(cuid())
-  // 0=Sunday … 6=Saturday
   weekday   Int
-  openTime  String // "16:00"
-  closeTime String // "22:00"
+  openTime  String
+  closeTime String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -274,8 +242,8 @@ model OpeningHour {
 
 model Blackout {
   id        String   @id @default(cuid())
-  startUtc  DateTime @db.Timestamptz
-  endUtc    DateTime @db.Timestamptz
+  startUtc  DateTime @db.Timestamptz(6)
+  endUtc    DateTime @db.Timestamptz(6)
   reason    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -294,7 +262,6 @@ model SlotSetting {
   updatedAt        DateTime @updatedAt
 }
 
-// Enums
 enum ReservationStatus {
   CONFIRMED
   CANCELLED
